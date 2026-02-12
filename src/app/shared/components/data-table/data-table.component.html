@@ -1,0 +1,30 @@
+<div class="data-table main-table">
+  <table mat-table [dataSource]="datasource" matSort (matSortChange)="onSort($event)" class="mat-elevation-z1">
+
+    <ng-container *ngFor="let col of columns" [matColumnDef]="col.key">
+      <th mat-header-cell *matHeaderCellDef [style.width]="col.width">
+        <div class="header-content-wrapper">
+          <span mat-sort-header="{{col.sortable ? col.key : ''}}">{{ col.label }}</span>
+          <div class="filter-container" *ngIf="col.filterable" (click)="$event.stopPropagation()">
+            <input matInput [placeholder]="'Filter ' + col.label" (input)="applyFilter(col.key, $event)"
+              class="column-filter-input">
+          </div>
+        </div>
+      </th>
+      <td mat-cell *matCellDef="let element" [style.width]="col.width">{{ element[col.key] }}</td>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Actions </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container *ngTemplateOutlet="rowActions!; context: { $implicit: element }"></ng-container>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onRowClick(row)"></tr>
+  </table>
+
+  <mat-paginator *ngIf="pageable" [pageSize]="pageSize" (page)="onPage($event)"></mat-paginator>
+</div>

@@ -1,0 +1,6 @@
+<div class="global-loader" *ngIf="loader.isLoading$ | async">
+  <div class="backdrop"></div>
+  <div class="spinner">
+    <mat-progress-spinner mode="indeterminate" diameter="56"></mat-progress-spinner>
+  </div>
+</div>

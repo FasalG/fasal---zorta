@@ -1,0 +1,92 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.search-container {
+    position: sticky;
+    top: 10px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    margin: 8px;
+    padding: 6px 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+
+    mat-icon {
+        margin-right: 8px;
+        color: var(--text-main);
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-family: var(--main-font);
+        font-size: 14px;
+        color: var(--text-main);
+        padding: 0;
+
+        &::placeholder {
+            color: var(--text-main);
+            opacity: 0.7;
+        }
+    }
+}
+
+.no-results {
+    padding: 12px;
+    text-align: center;
+    color: var(--text-main);
+    font-size: var(--font-size-small);
+    font-family: var(--main-font);
+}
+
+// .select-all-option {
+//     font-weight: 600;
+// }
+
+// Global Material Overrides for this component
+.mat-mdc-select-panel {
+    border-radius: 6px !important;
+    padding: 0 !important;
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    scrollbar-width: thin;
+}
+
+.mat-mdc-option {
+    min-height: 40px !important;
+    font-family: var(--main-font) !important;
+    font-size: var(--font-size-small) !important;
+
+    .mdc-list-item__primary-text {
+        color: var(--text-main) !important;
+    }
+}
+
+
+.select-all-option .mat-pseudo-checkbox {
+    display: none !important;
+}
+
+
+.search-box {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    outline: none;
+}
+
+.search-box:focus {
+    border-color: #2980ff;
+}

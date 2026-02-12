@@ -1,0 +1,35 @@
+@import '../abstract/variables';
+
+// 3. Browser normalization (minimal)
+/* A lightweight reset to keep things predictable */
+* {
+  box-sizing: border-box;
+}
+html, body, #root, app-root {
+  height: 100%;
+}
+body {
+  // margin: 0;
+  // font-family: var(--font-stack, system-ui, sans-serif);
+  // color: #222;
+  // -webkit-font-smoothing: antialiased;
+  // -moz-osx-font-smoothing: grayscale;
+
+  margin: 0;
+  // Use the App background for the whole page canvas
+  background-color: var(--bg-app); 
+  font-family: var(--main-font) !important;
+  color: var(--text-main);
+  font-size: var(--font-size-base)
+}
+
+
+
+.main-layout-wrapper {
+  display: flex;
+  min-height: 100vh;
+  // This ensures the background color is visible everywhere
+  background-color: var(--bg-app); 
+}
+
+

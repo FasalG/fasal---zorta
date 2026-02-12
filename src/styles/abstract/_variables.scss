@@ -1,0 +1,139 @@
+:root {
+
+  /* --- 1. PALETTE (Dynamic Colors) --- */
+
+  --main-font: 'Urbanist', sans-serif;
+  /* ERP Blue */
+
+
+  /* --- 2. DENSITY (The "Magic" for ERPs) --- */
+  /* Change this ONE variable to scale the whole app */
+  --unit-size: 1rem;
+
+  --sidebar-width: 290px;
+  --sidebar-collpsed: 65px;
+
+  --spacing-xs: calc(var(--unit-size) * 0.25);
+  --spacing-sm: calc(var(--unit-size) * 0.5);
+  --spacing-md: var(--unit-size);
+
+  --input-height: calc(var(--unit-size) * 2.5);
+  --line-height: 1;
+  --font-size-base: 14px;
+  --font-size-large: 16px;
+  --font-size-small: 12px;
+
+  --font-size-mainhead: 20px;
+
+  @media (max-width: 768px) {
+    --font-size-mainhead: 15px;
+  }
+
+  --font-weight-base: 400;
+  --font-weight-bold: 500;
+  --font-weight-light: 300;
+}
+
+
+
+/* --- 3. COMPACT MODE OVERRIDE --- */
+/* When <body> has class="compact-mode", everything shrinks */
+body.compact-mode {
+  --unit-size: 0.8rem;
+  /* Everything becomes 20% smaller */
+  --font-size-base: 12px;
+  --font-size-large: 14px;
+  --font-size-small: 10px;
+  --font-size-mainhead: 18px;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+:root {
+  /* =========================
+     1. LIGHT MODE (DEFAULT)
+
+  /* Backgrounds */
+  --bg-app: #F9F9F9;
+  /* Light Grey (App Background) */
+  --bg-surface: #FFFFFF;
+  /* White (Card/Table Background) */
+  --bg-surface-hover: #F8FAFC;
+
+  /* Text */
+  --text-main: #222222;
+  /* Almost Black */
+  --text-light: #666666;
+  /* Grey */
+  --text-inverse: #FFFFFF;
+  /* Text on Blue buttons */
+
+  /* Borders */
+  --border-color: #E3E3E3;
+
+  /* Primary Brand (Usually stays similar, maybe slightly darker) */
+  --primary: #3B82F6;
+  --primary-light: #EFF6FF;
+  /* Very light blue for backgrounds */
+
+  /* Aliases for global button system */
+  --color-primary: rgb(15, 15, 99);
+  --color-secondary: #64748B;
+
+  /* Action Colors */
+  --color-save: #22C55E;
+  --color-delete: #EF4444;
+  --color-cancel: #64748B;
+}
+
+/* =========================
+   2. DARK MODE OVERRIDES
+   ========================= */
+[data-theme="dark"] {
+  /* Backgrounds - We use "Blue-Greys" (Slate) for a modern ERP look, not pure black */
+  --bg-app: #0F172A;
+  /* Very Dark Blue */
+  --bg-surface: #1E293B;
+  /* Dark Grey/Blue */
+  --bg-surface-hover: #334155;
+
+  /* Text */
+  --text-main: #F1F5F9;
+  /* White-ish */
+  --text-light: #94A3B8;
+  /* Light Grey */
+
+  /* Borders */
+  --border-color: #334155;
+  /* Dark border */
+
+  /* Primary Brand (Adjusted for contrast on dark bg) */
+  --primary: #60A5FA;
+  /* Lighter Blue */
+  --primary-light: rgba(59, 130, 246, 0.15);
+  /* Low opacity blue */
+
+  /* Aliases for global button system (Dark Mode) */
+  --color-primary: var(--primary);
+  --color-secondary: #94A3B8;
+
+  /* Action Colors (Dark Mode) */
+  --color-save: #4ADE80;
+  --color-delete: #F87171;
+  --color-cancel: #94A3B8;
+}

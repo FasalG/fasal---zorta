@@ -1,0 +1,19 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb d-flex align-items-center m-0 p-0">
+        <li class="breadcrumb-item1 d-flex align-items-center">
+            <a (click)="routeToModule()" class="home-icon d-flex align-items-center">
+                <mat-icon class="small-icon">home</mat-icon>
+            </a>
+            <mat-icon class="separator">chevron_right</mat-icon>
+        </li>
+
+        <ng-container *ngFor="let breadcrumb of breadcrumbs$ | async; let last = last">
+            <li class="breadcrumb-item1 d-flex align-items-center" [class.active]="last">
+                <a *ngIf="!last" [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
+                <span *ngIf="last">{{ breadcrumb.label }}</span>
+
+                <mat-icon *ngIf="!last" class="separator">chevron_right</mat-icon>
+            </li>
+        </ng-container>
+    </ol>
+</nav>

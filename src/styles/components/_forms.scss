@@ -1,0 +1,14 @@
+input:not(.mat-mdc-input-element):not(.mdc-text-field__input),
+textarea:not(.mat-mdc-textarea-element),
+select:not(.mat-mdc-select) {
+  padding: 0.5rem;
+  border: 1px solid #dcdcdc;
+  border-radius: 0.25rem;
+  font: inherit;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+}

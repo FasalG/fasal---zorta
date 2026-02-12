@@ -1,0 +1,69 @@
+.main-layout-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.layout-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  overflow-y: auto;
+  overflow-x: hidden; // Critical: Prevent horizontal scroll
+  background-color: var(--bg-app);
+  transition: margin-left 0.3s ease;
+  width: calc(100% - var(--sidebar-width)); // Force correct width calculation
+  box-sizing: border-box;
+
+  /* Adjust for collapsed sidebar */
+  &.collapsed-sidebar {
+    margin-left: var(--sidebar-collpsed) !important;
+    width: calc(100% - var(--sidebar-collpsed)) !important;
+  }
+
+  /* Adjust for hidden sidebar */
+  &.full-width {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+
+  .layout-body {
+    position: relative;
+  }
+}
+
+/* Custom Scrollbar */
+.main-content {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+
+    &:hover {
+      background: #999;
+    }
+  }
+}

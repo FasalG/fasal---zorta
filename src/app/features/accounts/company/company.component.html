@@ -1,0 +1,58 @@
+<div class="mb-3">
+    <shared-action-button (pressed)="onSubmit()" variant="save" label="Submit Form"></shared-action-button>
+    <shared-action-button (pressed)="onCLick($event)" variant="delete" label="Reset Logic"></shared-action-button>
+</div>
+
+
+<form [formGroup]="companyForm" (ngSubmit)="onSubmit()" class="w-100 p-2">
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <shared-input formControlName="department" label="Department" placeholder="Enter department"></shared-input>
+        </div>
+        <div class="col-md-4">
+            <shared-dropdown formControlName="syllabus" label="Syllabus Pattern" [list]="[{Code:1,DisplayName:'Test'},
+                {Code:2,DisplayName:'Test2'},
+                {Code:3,DisplayName:'Test3'},
+                {Code:4,DisplayName:'Test4'},
+                {Code:5,DisplayName:'Test5'},
+                {Code:6,DisplayName:'Test6'},
+                {Code:7,DisplayName:'Test7'},
+                {Code:8,DisplayName:'Test8'},
+                {Code:9,DisplayName:'Test9'},
+                {Code:10,DisplayName:'Test10'},
+            ]" valueField="Code" displayField="DisplayName"></shared-dropdown>
+        </div>
+        <div class="col-md-4">
+            <shared-date-picker formControlName="sanctionedDate" label="Sanctioned Date"></shared-date-picker>
+        </div>
+    </div>
+</form>
+
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h5 class="mb-3">Company List</h5>
+        <shared-data-table [data]="companyData" [columns]="companyColumns" [pageSize]="5">
+            <ng-template #rowActions let-row>
+                <div class="d-flex gap-2">
+                    <shared-action-button (pressed)="onEdit(row)" variant="edit" label="Edit"></shared-action-button>
+                    <shared-action-button (pressed)="onDelete(row)" variant="delete"
+                        label="Delete"></shared-action-button>
+
+                </div>
+            </ng-template>
+        </shared-data-table>
+    </div>
+</div>
+
+
+<div class="mt-4 p-3 bg-light rounded" *ngIf="companyForm.value">
+    <strong>Current Form State:</strong>
+    <pre>{{ companyForm.value | json }}</pre>
+</div>
+
+<!-- <div class="row mt-3">
+    <div class="col-md-12">
+        <shared-textarea label="Remark" placeholder="Enter your remarks here"></shared-textarea>
+    </div>
+</div> -->

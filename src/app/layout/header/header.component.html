@@ -1,0 +1,86 @@
+<div class="erp-header w-100 d-flex justify-content-between align-items-center">
+  <div class="navbar-head">
+    <img src="../../../assets/tcs-logo.png" alt="" width="30" height="30"
+      class="d-inline-block align-text-center  mx-2" />
+    <span class="company">{{User?.companyName??'Christian College of Science and Technology'}}</span>
+  </div>
+
+
+
+
+  <!-- <button mat-icon-button (click)="toggleCompactMode()" title="Toggle Compact Mode">
+    <mat-icon>{{ isCompact ? 'compress' : 'expand' }}</mat-icon>
+  </button> -->
+  <div class="d-flex justify-content-end align-items-center">
+
+
+    <div>
+      <button mat-icon-button (click)="toggleTheme()" matTooltip="Toggle Dark/Light Mode">
+        <mat-icon [ngStyle]="{'color': isDarkMode ? '#FFFFFF' : '#222222'}">{{isDarkMode ? 'light_mode' : 'dark_mode'
+          }}</mat-icon>
+      </button>
+    </div>
+
+
+
+
+
+
+    <div class="profile-container d-flex align-items-center">
+      <!-- Trigger Avatar -->
+      <div class="profile-avatar cursor-pointer" (click)="toggleUserMenu()" matTooltip="View Profile">
+        <img style="border-radius: 50%; object-fit: cover"
+          [src]="User?.photopath??'../../../assets/images/profile-user.png'" alt="User Profile" />
+      </div>
+
+      <!-- Gmail-style Profile Popup -->
+      <div class="profile-popup" *ngIf="isUserMenuOpen">
+        <div class="popup-header d-flex justify-content-between align-items-center">
+          <span class="popup-email text-truncate">{{ User?.userName }}</span>
+          <button class="close-popup-btn" (click)="toggleUserMenu()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="popup-content text-center">
+          <div class="large-avatar-container mx-auto">
+            <img [src]="User?.photopath??'../../../assets/images/profile-user.png'" class="large-avatar"
+              alt="Large Avatar" />
+            <div class="camera-overlay">
+              <mat-icon>photo_camera</mat-icon>
+            </div>
+          </div>
+          <h3 class="greeting">Hi, {{ greetingName }}!</h3>
+          <p class="user-role">{{ User?.designation }}</p>
+
+          <button class="manage-account-btn" (click)="navigateTo('staff/StaffProfile')">
+            Manage your BizArabia Account
+          </button>
+        </div>
+
+        <div class="popup-navigation">
+          <button class="nav-item-btn" (click)="ModulesChange()">
+            <mat-icon>apps</mat-icon>
+            <span>Modules</span>
+          </button>
+          <button class="nav-item-btn" (click)="ChangePassword()">
+            <mat-icon>lock_reset</mat-icon>
+            <span>Change Password</span>
+          </button>
+        </div>
+
+        <div class="popup-footer">
+          <button class="sign-out-btn w-100" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sign out of all accounts</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+
+
+</div>

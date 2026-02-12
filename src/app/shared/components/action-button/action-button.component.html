@@ -1,0 +1,24 @@
+<!-- <button mat-raised-button [color]="computedColor" [disabled]="disabled || loading" (click)="onClick($event)" class="action-button">
+  <mat-icon *ngIf="icon && !loading">{{ icon }}</mat-icon>
+  <span *ngIf="!loading">{{ label ?? (variant === 'save' ? 'Save' : variant === 'delete' ? 'Delete' : (label || 'Action')) }}</span>
+  <mat-icon *ngIf="loading" class="spin">autorenew</mat-icon>
+</button> -->
+
+
+<button mat-flat-button [color]="computedColor" [disabled]="disabled || loading" (click)="onClick($event)"
+  class="action-button" [class]="'variant-' + variant">
+
+  @if (loading) {
+  <mat-icon class="spin">autorenew</mat-icon>
+  } @else {
+  @if (icon) {
+  <mat-icon>{{ icon }}</mat-icon>
+  }
+
+  <span>
+    {{ label ?? (variant === 'save' ? 'Save' : variant === 'delete' ? 'Delete' : variant === 'cancel' ? 'Cancel' :
+    'Action') }}
+  </span>
+  }
+
+</button>

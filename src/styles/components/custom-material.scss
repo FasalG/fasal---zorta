@@ -1,0 +1,612 @@
+.align-center-table {
+  text-align: center;
+}
+
+.option-3dot {
+  display: inherit;
+  background: none;
+  border: none;
+  padding: 0
+}
+
+.student-photo {
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 50%;
+  padding: 5px !important;
+}
+
+.arrow-icon-wrapper {
+  display: flex;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  background-color: transparent;
+  margin-left: 0.25rem;
+  margin-right: auto;
+  color: #007bff;
+}
+
+
+
+
+
+.mat-icon {
+  height: auto;
+  width: auto
+}
+
+
+// ::ng-deep {
+
+//     .select-all-option .mat-pseudo-checkbox {
+//       display: none !important;
+//     }
+
+
+//     .mat-select-value{
+//       color:black !important
+//     }
+
+//     td.mat-cell {
+//         border: none !important;
+//         border-bottom: none !important;
+//         color:black !important
+//       }
+
+//   // ========[Mat Form Field Style]=============
+//   .mat-form-field-appearance-outline .mat-form-field-outline {
+//     color: hsla(223, 36%, 81%, 1) !important;
+//     background-color: white;
+
+//   }
+
+
+
+//   .mat-form-field-wrapper {
+//     padding-bottom: 0px;
+//   }
+
+//   mat-form-field.mat-form-field.mat-form-field-appearance-outline
+//     > div.mat-form-field-wrapper
+//     > div.mat-form-field-flex
+//     > div.mat-form-field-infix {
+//     padding: 5px 0px;
+//   }
+
+//   mat-form-field.mat-form-field.mat-form-field-appearance-outline
+//     > div.mat-form-field-wrapper
+//     > div.mat-form-field-flex
+//     > div.mat-form-field-infix
+//     > span.mat-form-field-label-wrapper {
+//     top: -1.2em;
+//   }
+
+//   .mat-form-field-appearance-outline.mat-form-field-can-float.mat-form-field-should-float
+//     .mat-form-field-label {
+//     transform: translateY(-1.3em) scale(0.75);
+//     width: 133.33333%;
+//   }
+
+//   .mat-form-field-appearance-outline.mat-form-field-invalid.mat-form-field-invalid
+//     .mat-form-field-outline-thick {
+//     color: red !important;
+//     opacity: 0.8 !important;
+//   }
+
+//   // ========[Mat Dialog Style]=============
+//   .mat-dialog-container {
+//     box-shadow: none;
+//     // overflow: hidden !important;
+//   }
+
+//   // ========[Mat CheckBox Style]=============
+
+//   mat-checkbox {
+//     .mat-checkbox-layout {
+//       margin-bottom: 0;
+//     }
+
+//     border-radius: 4px;
+//   }
+
+//   // ========[Mat Menu Style]=============
+//   mat-menu button {
+//     padding: 8px 12px;
+//   }
+
+//   .mat-menu-content:not(:empty) {
+//     padding: 4px 2px;
+//   }
+
+
+
+//   .mat-menu-panel {
+//     box-shadow: -1px 0px 9px rgba(24, 73, 190, 0.06),
+//       2px 2px 5px -1px rgba(26, 35, 55, 0.06);
+//     min-height: inherit;
+//   }
+
+//   // ========[Mat Button Toggle]=============
+//   .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
+//     line-height: 48px !important;
+//   }
+
+//   // .mat-button-toggle-group {
+//   //   border:none
+//   // }
+//   // .mat-button-toggle{
+//   //     background-color: transparent !important;
+//   //     border-left: none !important;
+//   // }
+
+// /* Target the checked (selected) button toggle */
+// // .mat-button-toggle-checked.mat-button-toggle-button {
+// //   border-bottom: 2px solid blue;
+// // }
+
+// /* Optional: Remove the default focus overlay border if needed */
+// // .mat-button-toggle-checked .mat-button-toggle-focus-overlay {
+// //   border-bottom: none !important;
+// //   background-color: transparent !important;
+// // }
+
+// // ///////////////////'''
+// mat-button-toggle-group {
+//   border-bottom: 1px solid #ccc;
+//    border: none !important;
+// }
+
+// mat-button-toggle-button{
+//     span{
+//       line-height: 48px !important;
+//     }
+// }
+
+//  mat-button-toggle {
+//   background: transparent !important;
+//   border: none !important;
+//   box-shadow: none !important;
+//   color: #555;
+//   font-weight: 500;
+//   padding: 0px 10px;
+//   transition: color 0.3s ease, background 0.3s ease;
+// }
+
+// mat-button-toggle.active-toggle {
+//   color:  hsla(214, 100%, 54%, 1) !important;
+//   border-radius: 4px;
+// }
+
+// mat-button-toggle.active-toggle::after {
+//   content: '';
+//   position: absolute;
+//   bottom: 0;
+//   left: 0;
+//   width: 100%;
+//   height: 3px;
+//   background-color: hsla(214, 100%, 54%, 1);
+// }
+
+// // ========[Mat-tab-label]=============
+
+//  .mat-tab-label.mat-tab-label-active {
+//   color:  hsla(214, 100%, 54%, 1) ;
+// }
+
+//   // ========[Mat step header]=============
+//   .mat-step-header {
+//     height: inherit !important;
+//     padding: 12px 12px !important;
+
+//     &[ng-reflect-selected="true"] {
+//       background-color: rgba(0, 0, 0, 0.04);
+//       border-radius: 8px;
+//       border: var(--primaryBlue-12) solid 1px;
+//     }
+//   }
+
+//   //Dropdown
+//   .mat-select-panel {
+//     background: #ffffff;
+//     border: 1px solid #e9edf5;
+//     border-radius: 8px;
+//   }
+
+//   .mat-select-panel:not([class*="mat-elevation-z"]) {
+//     box-shadow: none;
+//   }
+
+//   .mat-select-panel .mat-option.mat-selected:not(.mat-option-multiple) {
+//     background: hsla(214, 100%, 54%, 0.12);
+//   }
+
+//   // ========[Mat Date Picker Style]=============
+//   .mat-calendar {
+//     .mat-button {
+//       color: var(--bodyFont) !important;
+//       // font-family: "Inter" !important;
+//       font-size: var(--font-size-14) !important;
+//       font-weight: 500 !important;
+//       letter-spacing: 0.219429px !important;
+//     }
+
+//     .mat-icon-button {
+//       color: var(--primaryBlue) !important;
+//       border-radius: 3.80344px !important;
+//       padding-right: 8px;
+//     }
+
+//     tr {
+//       border: none !important;
+//     }
+
+//     .mat-calendar-table-header-divider {
+//       position: static !important;
+//       height: 0 !important;
+//     }
+
+//     .mat-calendar-abbr {
+//       text-decoration: none !important;
+//     }
+
+//     .mat-calendar-body-selected {
+//       background-color: var(--primaryBlue) !important;
+//       border: 3.2px solid hsl(214, 71%, 84%) !important;
+//     }
+
+//     .mat-calendar-body-today {
+//       border: 1px solid #464e5f !important;
+//     }
+
+//     .mat-datepicker-popup {
+//       transform: translate(-10%, 8%) !important;
+//     }
+
+//     .mat-calendar-table-header-divider::after {
+//       background: none;
+//     }
+//   }
+
+//   .mat-input-element[type="datetime-local"]::after {
+//     content: " ";
+//     white-space: normal !important;
+//     width: 1px;
+//   }
+// }
+
+.submit-button {
+  background-color: var(--primaryBlue);
+  color: #fff;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 1rem;
+}
+
+// @import "../../../node_modules/bootstrap/scss/grid";
+
+// .resp-row-1 {
+//   @extend .col-lg-12;
+//   @extend .col-md-12;
+//   @extend .col-xl-12;
+//   @extend .col-sm-12;
+// }
+
+// .resp-row-2 {
+//   @extend .col-lg-6;
+//   @extend .col-md-12;
+//   @extend .col-xl-6;
+//   @extend .col-sm-12;
+// }
+
+// .resp-row-3 {
+//   @extend .col-lg-4;
+//   @extend .col-md-4;
+//   @extend .col-xl-4;
+//   @extend .col-sm-12;
+// }
+
+// .resp-row-4 {
+//   @extend .col-lg-3;
+//   @extend .col-md-6;
+//   @extend .col-xl-3;
+//   @extend .col-sm-12;
+// }
+
+// .resp-pl {
+//   @extend .pl-lg-0,
+//     .pl-xl-0,
+//     .pl-md-1,
+//     .pl-sm-0,
+//     .pr-lg-1,
+//     .pr-xl-1,
+//     .pr-md-1,
+//     .pr-sm-0;
+// }
+
+// .resp-pr {
+//   @extend .pr-lg-0,
+//     .pr-xl-0,
+//     .pr-md-1,
+//     .pr-sm-0,
+//     .pl-lg-1,
+//     .pl-xl-1,
+//     .pl-md-1,
+//     .pl-sm-0;
+// }
+
+// .resp-pc {
+//   @extend.pr-lg-1, .pr-xl-1,
+//   .pr-md-1,
+//   .pr-sm-0,
+//   .pl-lg-1,
+//   .pl-xl-1,
+//   .pl-md-1,
+//   .pl-sm-0;
+// }
+
+@media (max-width: 768px) {
+  .flex-grow-1 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
+// .pro-pl {
+//   @extend .pl-lg-3,
+//     .pl-xl-3,
+//     .pl-md-1,
+//     .pl-sm-0,
+//     .pr-lg-1,
+//     .pr-xl-1,
+//     .pr-md-1,
+//     .pr-sm-0;
+// }
+
+// .pro-pr {
+//   @extend .pr-lg-3,
+//     .pr-xl-3,
+//     .pr-md-1,
+//     .pr-sm-0,
+//     .pl-lg-1,
+//     .pl-xl-1,
+//     .pl-md-1,
+//     .pl-sm-0;
+// }
+
+// .pro-pc {
+//   @extend .pr-lg-1,
+//     .pr-xl-1,
+//     .pr-md-1,
+//     .pr-sm-0,
+//     .pl-lg-1,
+//     .pl-xl-1,
+//     .pl-md-1,
+//     .pl-sm-0;
+// }
+
+::ng-deep .cdk-global-scrollblock {
+  top: 0 !important;
+}
+
+@keyframes blinkAnimation {
+  0% {
+    opacity: 1;
+  }
+
+  25% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  75% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.blinkAnimation {
+  animation: blinkAnimation 2s 1;
+}
+
+/* Global Tooltip Customization */
+.mat-mdc-tooltip {
+  --mdc-plain-tooltip-container-color: #1a237e;
+  /* Dark Blue */
+  --mdc-plain-tooltip-supporting-text-color: #ffffff;
+  /* White */
+  --mdc-plain-tooltip-supporting-text-font: var(--font-size-small);
+  font-size: var(--font-size-small) !important;
+
+  background-color: #020636 !important;
+  color: #ffffff !important;
+  border-radius: 5px !important;
+
+}
+
+/* Fallback for older/non-MDC tooltips if any */
+.mat-tooltip {
+  background-color: #1a237e !important;
+  color: #ffffff !important;
+  font-size: var(--font-size-small) !important;
+}
+
+// ========[BizArabia Shared Form Field Styles]=============
+// Re-implementing with high specificity to force overrides on MDC components.
+// Targets both .shared-field and .shared-form-field.
+
+.shared-field,
+.shared-form-field {
+  width: 100% !important;
+  margin-bottom: 8px !important;
+
+  .mat-mdc-text-field-wrapper {
+    background-color: var(--bg-surface) !important;
+    padding: 0 12px !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-shadow: none !important;
+    border: 1px solid var(--border-color) !important;
+    height: 35px !important; // Default for inputs
+
+    &.mdc-text-field--outlined {
+      // Shape variables for modern Material
+      --mdc-outlined-text-field-container-shape: 12px !important;
+      --mdc-outlined-text-field-outline-color: hsla(223, 36%, 81%, 1) !important;
+
+      .mdc-notched-outline,
+      .mat-mdc-notched-outline {
+        padding: 0 !important;
+
+        .mdc-notched-outline__leading,
+        .mat-mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mat-mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing,
+        .mat-mdc-notched-outline__trailing {
+          border-color: hsla(223, 36%, 81%, 1) !important;
+          border-width: 1px !important;
+          border: none !important;
+        }
+
+        .mdc-notched-outline__leading,
+        .mat-mdc-notched-outline__leading {
+          border-radius: 12px 0 0 12px !important;
+          width: 12px !important;
+          border-right: none !important;
+        }
+
+        .mdc-notched-outline__trailing,
+        .mat-mdc-notched-outline__trailing {
+          border-radius: 0 12px 12px 0 !important;
+          border-left: none !important;
+        }
+      }
+    }
+
+    &:hover .mdc-notched-outline>*,
+    &:hover .mat-mdc-notched-outline>* {
+      border-color: var(--primary) !important;
+    }
+
+    &.mdc-text-field--focused .mdc-notched-outline>*,
+    &.mdc-text-field--focused .mat-mdc-notched-outline>* {
+      border-color: var(--primary) !important;
+      border-width: 2px !important;
+    }
+  }
+
+  // INNER ELEMENTS
+  .mat-mdc-form-field-infix {
+    padding: 0 !important;
+    min-height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+  }
+
+  .mat-mdc-input-element,
+  .mat-mdc-select-value {
+    font-size: var(--font-size-base) !important;
+    font-family: var(--main-font) !important;
+    color: var(--text-main) !important;
+    font-weight: var(--font-weight-base) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  // LABEL STYLING
+  .mat-mdc-form-field-label-wrapper {
+    top: 0 !important;
+    padding-top: 0 !important;
+    pointer-events: none;
+  }
+
+  .mdc-floating-label,
+  .mat-mdc-floating-label {
+    font-size: var(--font-size-base) !important;
+    color: var(--text-main) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .mdc-floating-label--float-above,
+  .mat-mdc-floating-label--float-above {
+    top: 24px !important;
+    transform: translateY(-42px) scale(0.85) !important;
+    // background-color: white !important;
+    font-size: var(--font-size-small) !important;
+    padding: 0 4px !important;
+    margin-left: -4px !important;
+    z-index: 5 !important;
+  }
+
+  // TEXTAREA SPECIFIC
+  &.mat-form-field-type-mat-textarea {
+    .mat-mdc-text-field-wrapper {
+      height: auto !important;
+      min-height: 45px !important; // Slightly more than standard input
+      align-items: flex-start !important;
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+    }
+
+    .mdc-floating-label,
+    .mat-mdc-floating-label {
+      top: 12px !important;
+      transform: none !important;
+    }
+
+    .mdc-floating-label--float-above,
+    .mat-mdc-floating-label--float-above {
+      transform: translateY(-24px) scale(0.85) !important;
+    }
+  }
+
+  // DATEPICKER & SUFFIX
+  .mat-mdc-form-field-icon-suffix {
+    padding: 0 !important;
+    align-self: center !important;
+
+    .mat-icon {
+      color: var(--text-light);
+      font-size: 20px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    .mat-mdc-button-base {
+      width: 32px !important;
+      height: 32px !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+  }
+
+  // SUBSCRIPT (Errors/Hints)
+  .mat-mdc-form-field-subscript-wrapper {
+    margin-top: 0.25rem !important;
+    padding: 0 4px !important;
+  }
+}
