@@ -102,11 +102,17 @@ import { BookingFormDialogComponent } from '../../features/bookings/components/b
                 </td>
                 <td class="px-4 py-3 text-end">
                   <div class="d-flex align-items-center justify-content-end gap-1">
-                    <button class="btn btn-sm btn-outline-success p-1" title="Mark as Closed/Returned" *ngIf="booking.status === 'active'" (click)="updateStatus(booking, 'closed')">
-                       <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    <button class="btn btn-sm btn-outline-primary p-1 border-0" title="Download Invoice" *ngIf="['pending', 'active'].includes(booking.status)" (click)="downloadInvoice(booking)">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </button>
+                    <button class="btn btn-sm btn-outline-info p-1 border-0" title="Download Receipt" *ngIf="booking.initial_payment_received > 0" (click)="downloadReceipt(booking)">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </button>
+
                     <button class="btn btn-sm btn-link p-1 text-primary" (click)="openBookingDialog(booking)">
                       <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -256,5 +262,37 @@ export class BookingsComponent implements OnInit {
         this.loadBookings();
       });
     }
+  }
+
+  downloadInvoice(booking: Booking) {
+    const id = booking._id || booking.id;
+    if (!id) return;
+    this.bookingService.downloadInvoice(id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Invoice-${booking.booking_number}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => alert('Failed to download invoice')
+    });
+  }
+
+  downloadReceipt(booking: Booking) {
+    const id = booking._id || booking.id;
+    if (!id) return;
+    this.bookingService.downloadReceipt(id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Receipt-${booking.booking_number}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => alert('Failed to download receipt')
+    });
   }
 }

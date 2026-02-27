@@ -35,4 +35,12 @@ export class BookingService {
     generateCode(prefix: string): string {
         return `${prefix}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
     }
+
+    downloadInvoice(id: string): Observable<Blob> {
+        return this.api.getFile(`${this.endpoint}/${id}/invoice`);
+    }
+
+    downloadReceipt(id: string): Observable<Blob> {
+        return this.api.getFile(`${this.endpoint}/${id}/receipt`);
+    }
 }

@@ -16,6 +16,11 @@ export class ApiService {
         return this.http.get<T>(`${this.apiUrl}/${endpoint}`, { params: httpParams });
     }
 
+    getFile(endpoint: string, params?: any): Observable<Blob> {
+        const httpParams = this.createHttpParams(params);
+        return this.http.get(`${this.apiUrl}/${endpoint}`, { params: httpParams, responseType: 'blob' });
+    }
+
     post<T>(endpoint: string, body: any): Observable<T> {
         return this.http.post<T>(`${this.apiUrl}/${endpoint}`, body);
     }
