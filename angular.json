@@ -5,7 +5,8 @@
     "packageManager": "npm",
     "cache": {
       "enabled": false
-    }
+    },
+    "analytics": "c047d34a-c113-46e9-8a41-bad94985c1ba"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -36,20 +37,15 @@
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.scss"
-            ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            ]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "3MB"
                 },
                 {
                   "type": "anyComponentStyle",

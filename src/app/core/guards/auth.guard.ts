@@ -1,22 +1,16 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
-import { isPlatformBrowser } from '@angular/common';
-import { AuthService } from '../api-services/auth/auth.service';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
-@Injectable({ providedIn: 'root' })
-export class AuthGuard implements CanActivate {
-  private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+export const authGuard: CanActivateFn = (route, state) => {
+    const authService = inject(AuthService);
+    const router = inject(Router);
 
-  constructor(private auth: AuthService, private router: Router) { }
-
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
-    if (!this.isBrowser) {
-      return true; // Allow rendering on server to prevent pre-emptive redirect
+    if (authService.isAuthenticated()) {
+        return true;
     }
 
-    const userSignal = this.auth.currentUser;
-    const user = userSignal();
-    if (user) return true;
-    return this.router.createUrlTree(['auth/login'], { queryParams: { returnUrl: state.url } });
-  }
-}
+    // Redirect to login page
+    router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+    return false;
+};
