@@ -8,6 +8,7 @@ import { InventoryService } from '../../services/inventory.service';
 import { RentalService } from '../../services/rental.service';
 import { Booking, Invoice, Customer, RentalItem } from '../../models/rental.models';
 import { BookingFormDialogComponent } from '../../features/bookings/components/booking-form-dialog/booking-form-dialog.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-bookings',
@@ -61,7 +62,16 @@ import { BookingFormDialogComponent } from '../../features/bookings/components/b
         <div class="card-header bg-white border-0 p-4 pb-0">
           <h5 class="fw-bold mb-0">Current Reservations</h5>
         </div>
-        <div class="table-responsive">
+        
+        <!-- Loader -->
+        <div class="card-body text-center py-5" *ngIf="isLoading()">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="mt-2 text-secondary small">Loading reservations...</div>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading()">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
@@ -138,6 +148,7 @@ import { BookingFormDialogComponent } from '../../features/bookings/components/b
   `]
 })
 export class BookingsComponent implements OnInit {
+  isLoading = signal(true);
   bookings = signal<Booking[]>([]);
   customers = signal<Customer[]>([]);
   items = signal<RentalItem[]>([]);
@@ -164,21 +175,28 @@ export class BookingsComponent implements OnInit {
   private dialog = inject(MatDialog);
 
   ngOnInit() {
-    this.loadBookings();
-    this.loadCustomers();
-    this.loadItems();
+    this.loadData();
+  }
+
+  loadData() {
+    this.isLoading.set(true);
+    forkJoin({
+      bookings: this.bookingService.getAll(),
+      customers: this.customerService.getAll(),
+      items: this.inventoryService.getAll()
+    }).subscribe({
+      next: (data) => {
+        this.bookings.set(data.bookings);
+        this.customers.set(data.customers);
+        this.items.set(data.items);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 
   loadBookings() {
     this.bookingService.getAll().subscribe(data => this.bookings.set(data));
-  }
-
-  loadCustomers() {
-    this.customerService.getAll().subscribe(data => this.customers.set(data));
-  }
-
-  loadItems() {
-    this.inventoryService.getAll().subscribe(data => this.items.set(data));
   }
 
   getEmptyBooking(): Partial<Booking> {

@@ -68,7 +68,15 @@ import { ExcelService } from '../../services/excel.service';
       </div>
 
       <div class="card shadow-sm border-0 overflow-hidden mb-4">
-        <div class="table-responsive">
+        <!-- Loader -->
+        <div class="card-body text-center py-5" *ngIf="isLoading()">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="mt-2 text-secondary small">Loading categories...</div>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading()">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light text-secondary small text-uppercase fw-medium">
               <tr>
@@ -108,6 +116,7 @@ import { ExcelService } from '../../services/excel.service';
   `]
 })
 export class CategoriesComponent implements OnInit {
+  isLoading = signal(true);
   categories = signal<Category[]>([]);
   isImporting = signal(false);
 
@@ -120,7 +129,14 @@ export class CategoriesComponent implements OnInit {
   }
 
   loadCategories() {
-    this.categoryService.getAll().subscribe(data => this.categories.set(data));
+    this.isLoading.set(true);
+    this.categoryService.getAll().subscribe({
+      next: (data) => {
+        this.categories.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 
   getEmptyCategory(): Partial<Category> {

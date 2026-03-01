@@ -5,6 +5,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BankDetailService } from '../../services/bank-detail.service';
 import { BookingService } from '../../services/booking.service';
 import { BankDetail, Booking } from '../../models/rental.models';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-bank-details',
@@ -28,7 +29,16 @@ import { BankDetail, Booking } from '../../models/rental.models';
       <div class="row g-4">
         <!-- Bank Accounts List -->
         <div class="col-12 col-lg-8" [class.col-lg-12]="!showForm">
-          <div class="row g-3">
+          
+          <!-- Loader -->
+          <div class="text-center py-5" *ngIf="isLoading()">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="mt-2 text-secondary small">Syncing bank details...</div>
+          </div>
+
+          <div class="row g-3" *ngIf="!isLoading()">
             
             <!-- Cash Summary Card -->
             <div class="col-12 col-md-6 text-dark" *ngIf="bankDetails().length >= 0">
@@ -178,6 +188,7 @@ export class BankDetailsComponent implements OnInit {
 
   @ViewChild('historyDialog') historyDialogTemplate!: TemplateRef<any>;
 
+  isLoading = signal(true);
   bankDetails = signal<BankDetail[]>([]);
   bookings = signal<Booking[]>([]);
 
@@ -186,8 +197,22 @@ export class BankDetailsComponent implements OnInit {
   currentBank: Partial<BankDetail> = {};
 
   ngOnInit() {
-    this.loadBankDetails();
-    this.loadBookings();
+    this.loadData();
+  }
+
+  loadData() {
+    this.isLoading.set(true);
+    forkJoin({
+      banks: this.bankService.getAll(),
+      bookings: this.bookingService.getAll()
+    }).subscribe({
+      next: (data) => {
+        this.bankDetails.set(data.banks);
+        this.bookings.set(data.bookings);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 
   loadBankDetails() {
@@ -195,10 +220,7 @@ export class BankDetailsComponent implements OnInit {
   }
 
   loadBookings() {
-    this.bookingService.getAll().subscribe({
-      next: (data) => this.bookings.set(data),
-      error: (err) => console.error('Failed to load bookings for payment tracking', err)
-    });
+    this.bookingService.getAll().subscribe(data => this.bookings.set(data));
   }
 
   getBankTotal(bankId: string | undefined): number {

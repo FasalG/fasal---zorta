@@ -7,6 +7,7 @@ import { InventoryService } from '../../services/inventory.service';
 import { Rental, Customer, RentalItem } from '../../models/rental.models';
 import { FormsModule } from '@angular/forms';
 import { RentalFormDialogComponent } from '../../features/rentals/components/rental-form-dialog/rental-form-dialog.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-rentals',
@@ -57,7 +58,15 @@ import { RentalFormDialogComponent } from '../../features/rentals/components/ren
 
       <!-- Rentals Table -->
       <div class="card shadow-sm border-0 overflow-hidden mb-4">
-        <div class="table-responsive">
+        <!-- Loader -->
+        <div class="card-body text-center py-5" *ngIf="isLoading()">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="mt-2 text-secondary small">Loading active rentals...</div>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading()">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
@@ -116,6 +125,7 @@ import { RentalFormDialogComponent } from '../../features/rentals/components/ren
   `]
 })
 export class RentalsComponent implements OnInit {
+  isLoading = signal(true);
   rentals = signal<Rental[]>([]);
   customers = signal<Customer[]>([]);
   items = signal<RentalItem[]>([]);
@@ -144,9 +154,24 @@ export class RentalsComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.loadRentals();
-    this.loadCustomers();
-    this.loadItems();
+    this.loadData();
+  }
+
+  loadData() {
+    this.isLoading.set(true);
+    forkJoin({
+      rentals: this.rentalService.getAll(),
+      customers: this.customerService.getAll(),
+      items: this.inventoryService.getAll()
+    }).subscribe({
+      next: (data) => {
+        this.rentals.set(data.rentals);
+        this.customers.set(data.customers);
+        this.items.set(data.items);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 
   loadRentals() {

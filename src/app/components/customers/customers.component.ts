@@ -72,7 +72,17 @@ import { CustomerFormDialogComponent } from '../../features/customers/components
         </div>
       </div>
 
-      <div class="row g-4">
+      </div>
+
+      <!-- Loader -->
+      <div class="text-center py-5" *ngIf="isLoading()">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="mt-2 text-secondary small">Loading customers...</div>
+      </div>
+
+      <div class="row g-4" *ngIf="!isLoading()">
         <div *ngFor="let customer of filteredCustomers()" class="col-12 col-md-6 col-lg-4">
           <div class="card h-100 shadow-sm border-0 hover-shadow transition-shadow">
             <div class="card-body p-4">
@@ -161,6 +171,7 @@ import { CustomerFormDialogComponent } from '../../features/customers/components
   `]
 })
 export class CustomersComponent implements OnInit {
+  isLoading = signal(true);
   searchTerm = signal('');
   customers = signal<Customer[]>([]);
 
@@ -190,8 +201,13 @@ export class CustomersComponent implements OnInit {
   }
 
   loadCustomers() {
-    this.customerService.getAll().subscribe(data => {
-      this.customers.set(data);
+    this.isLoading.set(true);
+    this.customerService.getAll().subscribe({
+      next: (data) => {
+        this.customers.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
     });
   }
 

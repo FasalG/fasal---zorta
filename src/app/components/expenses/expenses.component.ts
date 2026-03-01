@@ -88,7 +88,15 @@ import { ExpenseFormDialogComponent } from '../../features/expenses/components/e
 
       <!-- Expenses Table -->
       <div class="card shadow-sm border-0 overflow-hidden mb-4">
-        <div class="table-responsive">
+        <!-- Loader -->
+        <div class="card-body text-center py-5" *ngIf="isLoading()">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="mt-2 text-secondary small">Loading expenses...</div>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading()">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light text-secondary small text-uppercase fw-medium">
               <tr>
@@ -147,6 +155,7 @@ import { ExpenseFormDialogComponent } from '../../features/expenses/components/e
   `]
 })
 export class ExpensesComponent implements OnInit {
+  isLoading = signal(true);
   searchTerm = signal('');
   categoryFilter = signal('all');
   expenses = signal<Expense[]>([]);
@@ -188,8 +197,13 @@ export class ExpensesComponent implements OnInit {
   }
 
   loadExpenses() {
-    this.expenseService.getAll().subscribe(data => {
-      this.expenses.set(data);
+    this.isLoading.set(true);
+    this.expenseService.getAll().subscribe({
+      next: (data) => {
+        this.expenses.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
     });
   }
 

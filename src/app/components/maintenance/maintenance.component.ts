@@ -6,6 +6,7 @@ import { MaintenanceService } from '../../services/maintenance.service';
 import { InventoryService } from '../../services/inventory.service';
 import { Maintenance, RentalItem } from '../../models/rental.models';
 import { MaintenanceFormDialogComponent } from '../../features/maintenance/components/maintenance-form-dialog/maintenance-form-dialog.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-maintenance',
@@ -69,7 +70,15 @@ import { MaintenanceFormDialogComponent } from '../../features/maintenance/compo
 
       <!-- Maintenance Records Table -->
       <div class="card shadow-sm border-0 overflow-hidden mb-4">
-        <div class="table-responsive">
+        <!-- Loader -->
+        <div class="card-body text-center py-5" *ngIf="isLoading()">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div class="mt-2 text-secondary small">Loading maintenance records...</div>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading()">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light text-secondary small text-uppercase fw-medium">
               <tr>
@@ -128,6 +137,7 @@ import { MaintenanceFormDialogComponent } from '../../features/maintenance/compo
   `]
 })
 export class MaintenanceComponent implements OnInit {
+  isLoading = signal(true);
   records = signal<Maintenance[]>([]);
   items = signal<RentalItem[]>([]);
 
@@ -152,8 +162,22 @@ export class MaintenanceComponent implements OnInit {
   private dialog = inject(MatDialog);
 
   ngOnInit() {
-    this.loadMaintenance();
-    this.loadItems();
+    this.loadData();
+  }
+
+  loadData() {
+    this.isLoading.set(true);
+    forkJoin({
+      records: this.maintenanceService.getAll(),
+      items: this.inventoryService.getAll()
+    }).subscribe({
+      next: (data) => {
+        this.records.set(data.records);
+        this.items.set(data.items);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 
   loadMaintenance() {

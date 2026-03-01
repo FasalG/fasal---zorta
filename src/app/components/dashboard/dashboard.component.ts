@@ -6,14 +6,24 @@ import { BookingService } from '../../services/booking.service';
 import { ExpenseService } from '../../services/expense.service';
 import { CustomerService } from '../../services/customer.service';
 import { Rental, RentalItem, Booking, Expense, Customer } from '../../models/rental.models';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="row g-4 mb-4">
-      <div class="col-12 col-md-6 col-lg-3">
+    <!-- Loader -->
+    <div class="text-center py-5 my-5" *ngIf="isLoading()">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="mt-2 text-secondary small">Setting up your dashboard...</div>
+    </div>
+
+    <ng-container *ngIf="!isLoading()">
+      <div class="row g-4 mb-4">
+        <div class="col-12 col-md-6 col-lg-3">
         <div class="card shadow-sm border-0 p-4 h-100">
           <div class="d-flex align-items-center gap-3">
             <div class="p-3 bg-primary-subtle rounded-3 text-primary shadow-sm">
@@ -138,9 +148,11 @@ import { Rental, RentalItem, Booking, Expense, Customer } from '../../models/ren
         </div>
       </div>
     </div>
+    </ng-container>
   `
 })
 export class DashboardComponent implements OnInit {
+  isLoading = signal(true);
   rentals = signal<Rental[]>([]);
   items = signal<RentalItem[]>([]);
   bookings = signal<Booking[]>([]);
@@ -169,11 +181,24 @@ export class DashboardComponent implements OnInit {
   private customerService = inject(CustomerService);
 
   ngOnInit() {
-    this.rentalService.getAll().subscribe(data => this.rentals.set(data));
-    this.inventoryService.getAll().subscribe(data => this.items.set(data));
-    this.bookingService.getAll().subscribe(data => this.bookings.set(data));
-    this.expenseService.getAll().subscribe(data => this.expenses.set(data));
-    this.customerService.getAll().subscribe(data => this.customers.set(data));
+    this.isLoading.set(true);
+    forkJoin({
+      rentals: this.rentalService.getAll(),
+      items: this.inventoryService.getAll(),
+      bookings: this.bookingService.getAll(),
+      expenses: this.expenseService.getAll(),
+      customers: this.customerService.getAll()
+    }).subscribe({
+      next: (data) => {
+        this.rentals.set(data.rentals);
+        this.items.set(data.items);
+        this.bookings.set(data.bookings);
+        this.expenses.set(data.expenses);
+        this.customers.set(data.customers);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 
   getItemName(id: string): string {
