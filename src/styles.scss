@@ -138,6 +138,78 @@
   display: inline-block;
 }
 
+/* Premium Snackbar Styles */
+.mat-mdc-snack-bar-container {
+  .mdc-snackbar__surface {
+    background-color: var(--card, #ffffff) !important;
+    color: var(--foreground, #000000) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .mdc-snackbar__label {
+    color: inherit !important;
+    font-weight: 500;
+  }
+
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    color: var(--primary, #4f46e5) !important;
+    font-weight: 700;
+  }
+
+  /* Success Snackbar */
+  &.success-snackbar {
+    .mdc-snackbar__surface {
+      background-color: #22c55e !important;
+      color: white !important;
+    }
+
+    .mdc-snackbar__label {
+      color: white !important;
+    }
+
+    .mat-mdc-button.mat-mdc-snack-bar-action {
+      color: white !important;
+      opacity: 0.9;
+    }
+  }
+
+  /* Error Snackbar */
+  &.error-snackbar,
+  &.bg-danger {
+    .mdc-snackbar__surface {
+      background-color: #ef4444 !important;
+      color: white !important;
+    }
+
+    .mdc-snackbar__label {
+      color: white !important;
+    }
+
+    .mat-mdc-button.mat-mdc-snack-bar-action {
+      color: white !important;
+      opacity: 0.9;
+    }
+  }
+
+  /* Warning Snackbar */
+  &.bg-warning {
+    .mdc-snackbar__surface {
+      background-color: #f59e0b !important;
+      color: white !important;
+    }
+
+    .mdc-snackbar__label {
+      color: white !important;
+    }
+
+    .mat-mdc-button.mat-mdc-snack-bar-action {
+      color: white !important;
+      opacity: 0.9;
+    }
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

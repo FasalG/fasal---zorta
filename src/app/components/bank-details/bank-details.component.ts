@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, ViewChild, TemplateRef } from '@angu
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BankDetailService } from '../../services/bank-detail.service';
 import { BookingService } from '../../services/booking.service';
 import { BankDetail, Booking } from '../../models/rental.models';
@@ -10,7 +11,7 @@ import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-bank-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -185,6 +186,7 @@ export class BankDetailsComponent implements OnInit {
   private bankService = inject(BankDetailService);
   private bookingService = inject(BookingService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   @ViewChild('historyDialog') historyDialogTemplate!: TemplateRef<any>;
 
@@ -298,10 +300,17 @@ export class BankDetailsComponent implements OnInit {
   }
 
   deleteBank(bank: BankDetail) {
-    if (confirm('Are you sure you want to delete this bank account?')) {
+    const snackBarRef = this.snackBar.open('Are you sure you want to delete this bank account?', 'Confirm Delete', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
+
+    snackBarRef.onAction().subscribe(() => {
       this.bankService.delete((bank._id || bank.id)!).subscribe(() => {
         this.loadBankDetails();
+        this.snackBar.open('Bank account deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
-    }
+    });
   }
 }

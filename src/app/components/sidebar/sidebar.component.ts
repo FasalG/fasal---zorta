@@ -99,7 +99,7 @@ export class SidebarComponent {
     { route: 'expenses', label: 'Bills & Expenses', icon: 'Receipt' },
     { route: 'customers', label: 'Customers', icon: 'Users' },
     { route: 'maintenance', label: 'Maintenance', icon: 'Wrench' },
-    { route: 'analytics', label: 'Analytics', icon: 'BarChart3' },
+    // { route: 'analytics', label: 'Analytics', icon: 'BarChart3' },
   ];
 
   onMenuClick() {

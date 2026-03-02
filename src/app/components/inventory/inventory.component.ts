@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { InventoryService } from '../../services/inventory.service';
 import { CategoryService } from '../../services/category.service';
 import { BookingService } from '../../services/booking.service';
@@ -9,12 +10,13 @@ import { MaintenanceService } from '../../services/maintenance.service';
 import { RentalItem, Category, Booking, Maintenance } from '../../models/rental.models';
 import { InventoryFormDialogComponent } from '../../features/inventory/components/inventory-form-dialog/inventory-form-dialog.component';
 import { ExcelService } from '../../services/excel.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -99,20 +101,34 @@ import { forkJoin } from 'rxjs';
 
       <!-- Search -->
       <div class="card shadow-sm border-0 p-4 mb-4">
-        <div class="input-group">
-          <span class="input-group-text bg-transparent border-end-0 text-secondary">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8" stroke-width="2"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
-            </svg>
-          </span>
-          <input
-            type="text"
-            placeholder="Search equipment by name or SKU..."
-            class="form-control border-start-0 ps-0"
-            [ngModel]="searchTerm()"
-            (ngModelChange)="searchTerm.set($event)"
-          />
+        <div class="row g-3">
+          <div class="col-12 col-md-8">
+            <div class="input-group h-100">
+              <span class="input-group-text bg-transparent border-end-0 text-secondary">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8" stroke-width="2"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"></line>
+                </svg>
+              </span>
+              <input
+                type="text"
+                placeholder="Search equipment by name or SKU..."
+                class="form-control border-start-0 ps-0"
+                [ngModel]="searchTerm()"
+                (ngModelChange)="searchTerm.set($event)"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <select
+              class="form-select h-100"
+              [ngModel]="categoryFilter()"
+              (ngModelChange)="categoryFilter.set($event)"
+            >
+              <option value="all">All Categories</option>
+              <option *ngFor="let cat of categories()" [value]="cat._id || cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -203,6 +219,7 @@ import { forkJoin } from 'rxjs';
 export class InventoryComponent implements OnInit {
   isLoading = signal(true);
   searchTerm = signal('');
+  categoryFilter = signal('all');
   items = signal<RentalItem[]>([]);
   categories = signal<Category[]>([]);
   bookings = signal<Booking[]>([]);
@@ -211,11 +228,14 @@ export class InventoryComponent implements OnInit {
 
   filteredItems = computed(() => {
     const term = this.searchTerm().toLowerCase();
-    return this.items().filter(
-      (item) =>
-        (item.name || '').toLowerCase().includes(term) ||
-        (item.sku || '').toLowerCase().includes(term)
-    );
+    const filter = this.categoryFilter();
+
+    return this.items().filter((item) => {
+      const matchesSearch = (item.name || '').toLowerCase().includes(term) || (item.sku || '').toLowerCase().includes(term);
+      const itemCategory = typeof item.category === 'object' ? (item.category as any)?._id || (item.category as any)?.id : item.category;
+      const matchesCategory = filter === 'all' || itemCategory === filter;
+      return matchesSearch && matchesCategory;
+    });
   });
 
   totalItems = computed(() => {
@@ -242,6 +262,7 @@ export class InventoryComponent implements OnInit {
   private maintenanceService = inject(MaintenanceService);
   private excelService = inject(ExcelService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   ngOnInit() {
     this.refreshData();
@@ -250,10 +271,10 @@ export class InventoryComponent implements OnInit {
   refreshData() {
     this.isLoading.set(true);
     forkJoin({
-      items: this.inventoryService.getAll(),
-      categories: this.categoryService.getAll(),
-      bookings: this.bookingService.getAll(),
-      maintenances: this.maintenanceService.getAll()
+      items: this.inventoryService.getAll().pipe(catchError(() => of([]))),
+      categories: this.categoryService.getAll().pipe(catchError(() => of([]))),
+      bookings: this.bookingService.getAll().pipe(catchError(() => of([]))),
+      maintenances: this.maintenanceService.getAll().pipe(catchError(() => of([])))
     }).subscribe({
       next: (data) => {
         this.items.set(data.items);
@@ -367,9 +388,16 @@ export class InventoryComponent implements OnInit {
   }
 
   deleteItem(id: string) {
-    if (confirm('Are you sure you want to delete this item?')) {
-      this.inventoryService.delete(id).subscribe(() => this.refreshData());
-    }
+    const snackBarRef = this.snackBar.open('Are you sure you want to delete this item?', 'Confirm Delete', {
+      duration: 5000, horizontalPosition: 'center', verticalPosition: 'bottom'
+    });
+
+    snackBarRef.onAction().subscribe(() => {
+      this.inventoryService.delete(id).subscribe(() => {
+        this.refreshData();
+        this.snackBar.open('Item deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
+      });
+    });
   }
 
   exportToExcel() {
@@ -426,18 +454,20 @@ export class InventoryComponent implements OnInit {
       this.inventoryService.bulkAdd(validItems).subscribe({
         next: () => {
           this.refreshData();
-          alert(`Imported ${validItems.length} items`);
+          this.snackBar.open(`Imported ${validItems.length} items successfully`, 'Close', { duration: 4000 });
           this.isImporting.set(false);
           event.target.value = '';
         },
         error: () => {
-          alert('Import failed');
+          this.snackBar.open('Import failed. Please check your data or try again later.', 'Close', { duration: 5000, panelClass: ['bg-danger', 'text-white'] });
           this.isImporting.set(false);
           event.target.value = '';
         }
       });
     } catch (err) {
+      this.snackBar.open('Error parsing file.', 'Close', { duration: 4000, panelClass: ['bg-danger', 'text-white'] });
       this.isImporting.set(false);
+      event.target.value = '';
     }
   }
 }

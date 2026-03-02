@@ -5,8 +5,9 @@ import { InventoryService } from '../../services/inventory.service';
 import { BookingService } from '../../services/booking.service';
 import { ExpenseService } from '../../services/expense.service';
 import { CustomerService } from '../../services/customer.service';
-import { Rental, RentalItem, Booking, Expense, Customer } from '../../models/rental.models';
-import { forkJoin } from 'rxjs';
+import { RentalItem, Booking, Expense, Customer } from '../../models/rental.models';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -98,25 +99,28 @@ import { forkJoin } from 'rxjs';
                 <tr>
                   <th class="px-4 py-3 border-0">Item</th>
                   <th class="px-4 py-3 border-0">Customer</th>
-                  <th class="px-4 py-3 border-0">Due Date</th>
+                  <th class="px-4 py-3 border-0">End Date</th>
                   <th class="px-4 py-3 border-0">Amount</th>
                   <th class="px-4 py-3 border-0">Status</th>
                 </tr>
               </thead>
               <tbody class="border-top-0">
-                <tr *ngFor="let rental of recentRentals()" class="small">
-                  <td class="px-4 py-3 fw-medium text-dark">{{ getItemName(rental.item) }}</td>
-                  <td class="px-4 py-3 text-secondary">{{ getCustomerName(rental.customer) }}</td>
-                  <td class="px-4 py-3 text-secondary">{{ rental.due_date }}</td>
-                  <td class="px-4 py-3 fw-bold text-dark">{{ rental.total_amount | currency:'INR':'symbol' }}</td>
+                <tr *ngFor="let booking of recentRentals()" class="small">
+                  <td class="px-4 py-3 fw-medium text-dark">
+                    {{ getItemName(booking.items[0]?.item) }}
+                    <span *ngIf="booking.items.length > 1" class="text-secondary smaller ms-1">+{{ booking.items.length - 1 }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-secondary">{{ getCustomerName(booking.customer) }}</td>
+                  <td class="px-4 py-3 text-secondary">{{ booking.end_date | date:'mediumDate' }}</td>
+                  <td class="px-4 py-3 fw-bold text-dark">{{ booking.amount | currency:'INR':'symbol' }}</td>
                   <td class="px-4 py-3">
-                    <span [class]="rental.status === 'overdue' ? 'badge bg-danger' : 'badge bg-success-subtle text-success'">
-                      {{ rental.status | titlecase }}
+                    <span [class]="booking.status === 'closed' ? 'badge bg-secondary' : 'badge bg-success-subtle text-success'">
+                      {{ booking.status | titlecase }}
                     </span>
                   </td>
                 </tr>
                 <tr *ngIf="recentRentals().length === 0">
-                  <td colspan="5" class="text-center py-4 text-secondary">No active rentals found.</td>
+                  <td colspan="5" class="text-center py-4 text-secondary">No recent bookings found.</td>
                 </tr>
               </tbody>
             </table>
@@ -153,20 +157,34 @@ import { forkJoin } from 'rxjs';
 })
 export class DashboardComponent implements OnInit {
   isLoading = signal(true);
-  rentals = signal<Rental[]>([]);
   items = signal<RentalItem[]>([]);
   bookings = signal<Booking[]>([]);
   expenses = signal<Expense[]>([]);
   customers = signal<Customer[]>([]);
 
-  totalRevenue = computed(() => this.rentals().reduce((sum, r) => sum + r.total_amount, 0));
-  activeRentalsCount = computed(() => this.rentals().filter(r => r.status === 'active').length);
-  availableItemsCount = computed(() => this.items().reduce((sum, item) => sum + item.available_quantity, 0));
+  totalRevenue = computed(() => this.bookings().reduce((sum, b) => b.status !== 'cancelled' ? sum + b.amount : sum, 0));
+  activeRentalsCount = computed(() => this.bookings().filter(b => b.status === 'active').length);
+
+  availableItemsCount = computed(() => {
+    const totalItems = this.items().reduce((sum, item) => sum + item.total_quantity, 0);
+    const rentedItems = this.bookings()
+      .filter(b => b.status === 'active')
+      .reduce((sum, b) => {
+        return sum + b.items.reduce((itemSum, i) => itemSum + i.quantity, 0);
+      }, 0);
+    return Math.max(0, totalItems - rentedItems);
+  });
+
   pendingBookingsCount = computed(() => this.bookings().filter(b => b.status === 'pending').length);
-  recentRentals = computed(() => [...this.rentals()].reverse().slice(0, 5));
+  recentRentals = computed(() => [...this.bookings()].reverse().slice(0, 5));
   monthlyExpenses = computed(() => this.expenses().reduce((sum, e) => sum + e.amount, 0));
   grossProfit = computed(() => this.totalRevenue() - this.monthlyExpenses());
-  outstandingPayments = computed(() => this.rentals().reduce((sum, r) => sum + (r.total_amount - r.paid_amount), 0));
+
+  outstandingPayments = computed(() => this.bookings().reduce((sum, b) => {
+    if (b.status === 'cancelled') return sum;
+    return sum + Math.max(0, b.amount - (b.initial_payment_received || 0));
+  }, 0));
+
   utilizationRate = computed(() => {
     const total = this.items().reduce((sum, i) => sum + i.total_quantity, 0);
     if (total === 0) return '0';
@@ -174,7 +192,6 @@ export class DashboardComponent implements OnInit {
     return ((rented / total) * 100).toFixed(1);
   });
 
-  private rentalService = inject(RentalService);
   private inventoryService = inject(InventoryService);
   private bookingService = inject(BookingService);
   private expenseService = inject(ExpenseService);
@@ -183,29 +200,34 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.isLoading.set(true);
     forkJoin({
-      rentals: this.rentalService.getAll(),
-      items: this.inventoryService.getAll(),
-      bookings: this.bookingService.getAll(),
-      expenses: this.expenseService.getAll(),
-      customers: this.customerService.getAll()
+      items: this.inventoryService.getAll().pipe(catchError(() => of([]))),
+      bookings: this.bookingService.getAll().pipe(catchError(() => of([]))),
+      expenses: this.expenseService.getAll().pipe(catchError(() => of([]))),
+      customers: this.customerService.getAll().pipe(catchError(() => of([])))
     }).subscribe({
       next: (data) => {
-        this.rentals.set(data.rentals);
         this.items.set(data.items);
         this.bookings.set(data.bookings);
         this.expenses.set(data.expenses);
         this.customers.set(data.customers);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false)
+      error: (err) => {
+        console.error('Dashboard data load error', err);
+        this.isLoading.set(false);
+      }
     });
   }
 
-  getItemName(id: string): string {
+  getItemName(data: any): string {
+    if (!data) return 'Unknown';
+    const id = typeof data === 'object' ? (data._id || data.id) : data;
     return this.items().find(i => (i._id || i.id) === id)?.name || 'Unknown';
   }
 
-  getCustomerName(id: string): string {
+  getCustomerName(data: any): string {
+    if (!data) return 'Unknown';
+    const id = typeof data === 'object' ? (data._id || data.id) : data;
     return this.customers().find(c => (c._id || c.id) === id)?.name || 'Unknown';
   }
 }

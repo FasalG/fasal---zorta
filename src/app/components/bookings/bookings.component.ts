@@ -2,18 +2,20 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BookingService } from '../../services/booking.service';
 import { CustomerService } from '../../services/customer.service';
 import { InventoryService } from '../../services/inventory.service';
 import { RentalService } from '../../services/rental.service';
 import { Booking, Invoice, Customer, RentalItem } from '../../models/rental.models';
 import { BookingFormDialogComponent } from '../../features/bookings/components/booking-form-dialog/booking-form-dialog.component';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -173,6 +175,7 @@ export class BookingsComponent implements OnInit {
   private customerService = inject(CustomerService);
   private inventoryService = inject(InventoryService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   ngOnInit() {
     this.loadData();
@@ -181,9 +184,9 @@ export class BookingsComponent implements OnInit {
   loadData() {
     this.isLoading.set(true);
     forkJoin({
-      bookings: this.bookingService.getAll(),
-      customers: this.customerService.getAll(),
-      items: this.inventoryService.getAll()
+      bookings: this.bookingService.getAll().pipe(catchError(() => of([]))),
+      customers: this.customerService.getAll().pipe(catchError(() => of([]))),
+      items: this.inventoryService.getAll().pipe(catchError(() => of([])))
     }).subscribe({
       next: (data) => {
         this.bookings.set(data.bookings);
@@ -251,8 +254,11 @@ export class BookingsComponent implements OnInit {
       if (result) {
         if (booking) {
           this.bookingService.update(result as Booking).subscribe({
-            next: () => this.loadBookings(),
-            error: (err) => alert(err.error?.message || 'Failed to update booking')
+            next: () => {
+              this.loadBookings();
+              this.snackBar.open('Booking updated successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
+            },
+            error: (err) => this.snackBar.open(err.error?.message || 'Failed to update booking', 'Close', { duration: 4000, panelClass: ['bg-danger', 'text-white'] })
           });
         } else {
           const newBooking = {
@@ -261,8 +267,11 @@ export class BookingsComponent implements OnInit {
             created_at: new Date().toISOString()
           } as Booking;
           this.bookingService.add(newBooking).subscribe({
-            next: () => this.loadBookings(),
-            error: (err) => alert(err.error?.message || 'Failed to create booking')
+            next: () => {
+              this.loadBookings();
+              this.snackBar.open('Booking created successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
+            },
+            error: (err) => this.snackBar.open(err.error?.message || 'Failed to create booking', 'Close', { duration: 4000, panelClass: ['bg-danger', 'text-white'] })
           });
         }
       }
@@ -275,11 +284,18 @@ export class BookingsComponent implements OnInit {
   }
 
   deleteBooking(id: string) {
-    if (confirm('Are you sure you want to cancel this booking?')) {
+    const snackBarRef = this.snackBar.open('Are you sure you want to cancel this booking?', 'Confirm Cancel', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
+
+    snackBarRef.onAction().subscribe(() => {
       this.bookingService.delete(id).subscribe(() => {
         this.loadBookings();
+        this.snackBar.open('Booking cancelled successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
-    }
+    });
   }
 
   downloadInvoice(booking: Booking) {
@@ -293,8 +309,9 @@ export class BookingsComponent implements OnInit {
         a.download = `Invoice-${booking.booking_number}.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
+        this.snackBar.open('Invoice downloaded successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       },
-      error: () => alert('Failed to download invoice')
+      error: () => this.snackBar.open('Failed to download invoice', 'Close', { duration: 4000, panelClass: ['bg-danger', 'text-white'] })
     });
   }
 
@@ -309,8 +326,9 @@ export class BookingsComponent implements OnInit {
         a.download = `Receipt-${booking.booking_number}.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
+        this.snackBar.open('Receipt downloaded successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       },
-      error: () => alert('Failed to download receipt')
+      error: () => this.snackBar.open('Failed to download receipt', 'Close', { duration: 4000, panelClass: ['bg-danger', 'text-white'] })
     });
   }
 }

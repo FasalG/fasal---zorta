@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/rental.models';
 import { CustomerFormDialogComponent } from '../../features/customers/components/customer-form-dialog/customer-form-dialog.component';
@@ -9,7 +10,7 @@ import { CustomerFormDialogComponent } from '../../features/customers/components
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -195,6 +196,7 @@ export class CustomersComponent implements OnInit {
 
   private customerService = inject(CustomerService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   ngOnInit() {
     this.loadCustomers();
@@ -262,10 +264,17 @@ export class CustomersComponent implements OnInit {
   }
 
   deleteCustomer(id: string) {
-    if (confirm('Are you sure you want to delete this customer?')) {
+    const snackBarRef = this.snackBar.open('Are you sure you want to delete this customer?', 'Confirm Delete', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
+
+    snackBarRef.onAction().subscribe(() => {
       this.customerService.delete(id).subscribe(() => {
         this.loadCustomers();
+        this.snackBar.open('Customer deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
-    }
+    });
   }
 }

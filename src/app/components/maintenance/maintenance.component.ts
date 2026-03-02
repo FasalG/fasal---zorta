@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { InventoryService } from '../../services/inventory.service';
 import { Maintenance, RentalItem } from '../../models/rental.models';
@@ -11,7 +12,7 @@ import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-maintenance',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -94,7 +95,7 @@ import { forkJoin } from 'rxjs';
             </thead>
             <tbody class="border-top-0">
               <tr *ngFor="let record of records()" class="hover-bg-light">
-                <td class="px-4 py-3 small fw-bold text-dark">{{ getItemName(record._id) }}</td>
+                <td class="px-4 py-3 small fw-bold text-dark">{{ getItemName(record.item) }}</td>
                 <td class="px-4 py-3">
                    <div class="d-flex flex-column gap-1">
                       <span [class]="getPriorityClass(record.priority)">{{ record.priority | titlecase }}</span>
@@ -160,6 +161,7 @@ export class MaintenanceComponent implements OnInit {
   private maintenanceService = inject(MaintenanceService);
   private inventoryService = inject(InventoryService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   ngOnInit() {
     this.loadData();
@@ -200,7 +202,9 @@ export class MaintenanceComponent implements OnInit {
     };
   }
 
-  getItemName(id?: string): string {
+  getItemName(data?: any): string {
+    if (!data) return 'Unknown Item';
+    const id = typeof data === 'object' ? (data._id || data.id) : data;
     return this.items().find(i => (i._id || i.id) === id)?.name || 'Unknown Item';
   }
 
@@ -248,10 +252,17 @@ export class MaintenanceComponent implements OnInit {
   }
 
   deleteRecord(id: string) {
-    if (confirm('Are you sure you want to delete this record?')) {
+    const snackBarRef = this.snackBar.open('Are you sure you want to delete this record?', 'Confirm Delete', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
+
+    snackBarRef.onAction().subscribe(() => {
       this.maintenanceService.delete(id).subscribe(() => {
         this.loadMaintenance();
+        this.snackBar.open('Maintenance record deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
-    }
+    });
   }
 }

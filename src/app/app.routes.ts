@@ -50,11 +50,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./components/maintenance/maintenance.component').then(m => m.MaintenanceComponent),
   },
-  {
-    path: 'analytics',
-    canActivate: [authGuard],
-    loadComponent: () => import('./components/analytics/analytics.component').then(m => m.AnalyticsComponent),
-  },
+  // {
+  //   path: 'analytics',
+  //   canActivate: [authGuard],
+  //   loadComponent: () => import('./components/analytics/analytics.component').then(m => m.AnalyticsComponent),
+  // },
   {
     path: 'bank-details',
     canActivate: [authGuard],

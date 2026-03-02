@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ExpenseService } from '../../services/expense.service';
 import { Expense } from '../../models/rental.models';
 import { ExpenseFormDialogComponent } from '../../features/expenses/components/expense-form-dialog/expense-form-dialog.component';
@@ -9,7 +10,7 @@ import { ExpenseFormDialogComponent } from '../../features/expenses/components/e
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -189,6 +190,7 @@ export class ExpensesComponent implements OnInit {
 
   private expenseService = inject(ExpenseService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   constructor() { }
 
@@ -270,10 +272,17 @@ export class ExpensesComponent implements OnInit {
   }
 
   deleteExpense(id: string) {
-    if (confirm('Are you sure you want to delete this expense?')) {
+    const snackBarRef = this.snackBar.open('Are you sure you want to delete this expense?', 'Confirm Delete', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
+
+    snackBarRef.onAction().subscribe(() => {
       this.expenseService.delete(id).subscribe(() => {
         this.loadExpenses();
+        this.snackBar.open('Expense deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
-    }
+    });
   }
 }

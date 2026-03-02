@@ -1,18 +1,20 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RentalService } from '../../services/rental.service';
 import { CustomerService } from '../../services/customer.service';
 import { InventoryService } from '../../services/inventory.service';
 import { Rental, Customer, RentalItem } from '../../models/rental.models';
 import { FormsModule } from '@angular/forms';
 import { RentalFormDialogComponent } from '../../features/rentals/components/rental-form-dialog/rental-form-dialog.component';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-rentals',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -150,6 +152,7 @@ export class RentalsComponent implements OnInit {
   private customerService = inject(CustomerService);
   private inventoryService = inject(InventoryService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   constructor() { }
 
@@ -160,9 +163,9 @@ export class RentalsComponent implements OnInit {
   loadData() {
     this.isLoading.set(true);
     forkJoin({
-      rentals: this.rentalService.getAll(),
-      customers: this.customerService.getAll(),
-      items: this.inventoryService.getAll()
+      rentals: this.rentalService.getAll().pipe(catchError(() => of([]))),
+      customers: this.customerService.getAll().pipe(catchError(() => of([]))),
+      items: this.inventoryService.getAll().pipe(catchError(() => of([])))
     }).subscribe({
       next: (data) => {
         this.rentals.set(data.rentals);
@@ -170,7 +173,10 @@ export class RentalsComponent implements OnInit {
         this.items.set(data.items);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false)
+      error: (err) => {
+        console.error('Rentals payload error', err);
+        this.isLoading.set(false);
+      }
     });
   }
 
@@ -263,10 +269,17 @@ export class RentalsComponent implements OnInit {
   }
 
   deleteRental(id: string) {
-    if (confirm('Are you sure you want to delete this rental?')) {
+    const snackBarRef = this.snackBar.open('Are you sure you want to delete this rental?', 'Confirm Delete', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
+
+    snackBarRef.onAction().subscribe(() => {
       this.rentalService.delete(id).subscribe(() => {
         this.loadRentals();
+        this.snackBar.open('Rental deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
-    }
+    });
   }
 }

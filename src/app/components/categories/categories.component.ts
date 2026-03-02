@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CategoryService } from '../../services/category.service';
 import { Category } from '../../models/rental.models';
 import { CategoryFormDialogComponent } from '../../features/categories/components/category-form-dialog/category-form-dialog.component';
@@ -10,7 +11,7 @@ import { ExcelService } from '../../services/excel.service';
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -123,6 +124,7 @@ export class CategoriesComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private excelService = inject(ExcelService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   ngOnInit() {
     this.loadCategories();
@@ -166,11 +168,18 @@ export class CategoriesComponent implements OnInit {
   }
 
   deleteCategory(id: string) {
-    if (confirm('Are you sure you want to delete this category?')) {
+    const snackBarRef = this.snackBar.open('Are you sure you want to delete this category?', 'Confirm Delete', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
+
+    snackBarRef.onAction().subscribe(() => {
       this.categoryService.delete(id).subscribe(() => {
         this.loadCategories();
+        this.snackBar.open('Category deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
-    }
+    });
   }
 
   // Excel Export Logic
@@ -201,7 +210,7 @@ export class CategoriesComponent implements OnInit {
       const importedData = await this.excelService.parseFile(file);
 
       if (!importedData || importedData.length === 0) {
-        alert('No data found in the Excel file.');
+        this.snackBar.open('No data found in the Excel file.', 'Close', { duration: 4000, panelClass: ['bg-warning'] });
         this.isImporting.set(false);
         return;
       }
@@ -212,7 +221,7 @@ export class CategoriesComponent implements OnInit {
       importedData.forEach((row, index) => {
         const categoryName = row['Category Name'];
         if (!categoryName) {
-          errors.push(`Row ₹{index + 2}: Missing "Category Name".`);
+          errors.push(`Row ${index + 2}: Missing "Category Name".`);
           return;
         }
 
@@ -224,7 +233,7 @@ export class CategoriesComponent implements OnInit {
       });
 
       if (errors.length > 0) {
-        alert(`Found ₹{errors.length} issues in the file:\n\n₹{errors.slice(0, 5).join('\n')}₹{errors.length > 5 ? '\n...and more.' : ''}\n\nPlease fix them and try again.`);
+        this.snackBar.open(`Found ${errors.length} issues in the file. Please fix them and try again.`, 'Close', { duration: 6000, panelClass: ['bg-danger', 'text-white'] });
         this.isImporting.set(false);
         event.target.value = '';
         return;
@@ -234,20 +243,20 @@ export class CategoriesComponent implements OnInit {
         this.categoryService.bulkAdd(validCategories).subscribe({
           next: () => {
             this.loadCategories();
-            alert(`Successfully imported ₹{validCategories.length} categories!`);
+            this.snackBar.open(`Successfully imported ${validCategories.length} categories!`, 'Close', { duration: 4000, panelClass: ['success-snackbar'] });
             this.isImporting.set(false);
             event.target.value = '';
           },
           error: (err) => {
             console.error('Import error:', err);
-            alert('Failed to import categories. There might be a backend error.');
+            this.snackBar.open('Failed to import categories. There might be a backend error.', 'Close', { duration: 5000, panelClass: ['bg-danger', 'text-white'] });
             this.isImporting.set(false);
             event.target.value = '';
           }
         });
       }
     } catch (err: any) {
-      alert(`Error reading file: ₹{err.message}`);
+      this.snackBar.open(`Error reading file: ${err.message}`, 'Close', { duration: 5000, panelClass: ['bg-danger', 'text-white'] });
       this.isImporting.set(false);
       event.target.value = '';
     }
