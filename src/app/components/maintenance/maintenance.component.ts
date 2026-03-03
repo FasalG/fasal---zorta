@@ -43,28 +43,28 @@ import { forkJoin } from 'rxjs';
 
       <!-- Stats -->
       <div class="row g-3 mb-4">
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Scheduled</p>
-            <p class="h4 fw-bold text-primary mb-0">{{ scheduledCount() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Scheduled</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-primary mb-0 text-truncate">{{ scheduledCount() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">In Progress</p>
-            <p class="h4 fw-bold text-warning-emphasis mb-0">{{ inProgressCount() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">In Progress</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-warning-emphasis mb-0 text-truncate">{{ inProgressCount() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Overdue</p>
-            <p class="h4 fw-bold text-danger mb-0">{{ overdueCount() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Overdue</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-danger mb-0 text-truncate">{{ overdueCount() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Total Cost (MTD)</p>
-            <p class="h4 fw-bold text-success mb-0">{{ totalCost() | currency:'INR':'symbol' }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Total Cost (MTD)</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-success mb-0 text-truncate">{{ totalCost() | currency:'INR':'symbol' }}</p>
           </div>
         </div>
       </div>

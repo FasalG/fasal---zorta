@@ -69,7 +69,7 @@ import { forkJoin } from 'rxjs';
                   </div>
                 </div>
                 <h5 class="fw-bold mb-1">{{ bank.bank_name }}</h5>
-                <p class="text-secondary small mb-1">{{ bank.account_holder }}</p>
+                <p class="text-secondary small mb-1 text-truncate" title="Metric">{{ bank.account_holder }}</p>
 
                 <div class="mt-2 mb-3">
                   <span class="text-secondary small d-block mb-1">Total Collected</span>

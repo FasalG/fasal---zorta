@@ -28,28 +28,28 @@ import { CustomerFormDialogComponent } from '../../features/customers/components
 
       <!-- Stats -->
       <div class="row g-3 mb-4">
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Total Customers</p>
-            <p class="h4 fw-bold text-dark mb-0">{{ customers().length }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Total Customers</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-dark mb-0 text-truncate">{{ customers().length }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Active Customers</p>
-            <p class="h4 fw-bold text-success mb-0">{{ activeCustomersCount() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Active Customers</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-success mb-0 text-truncate">{{ activeCustomersCount() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">GST Registered</p>
-            <p class="h4 fw-bold text-primary mb-0">{{ gstRegisteredCount() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">GST Registered</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-primary mb-0 text-truncate">{{ gstRegisteredCount() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Internal Code Range</p>
-            <p class="h4 fw-bold text-info-emphasis mb-0">CUS-001</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Internal Code Range</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-info-emphasis mb-0 text-truncate">CUS-001</p>
           </div>
         </div>
       </div>

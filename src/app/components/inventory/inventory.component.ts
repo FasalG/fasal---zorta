@@ -9,6 +9,7 @@ import { BookingService } from '../../services/booking.service';
 import { MaintenanceService } from '../../services/maintenance.service';
 import { RentalItem, Category, Booking, Maintenance } from '../../models/rental.models';
 import { InventoryFormDialogComponent } from '../../features/inventory/components/inventory-form-dialog/inventory-form-dialog.component';
+import { ItemAvailabilityCalendarDialogComponent } from '../../shared/components/item-availability-calendar-dialog/item-availability-calendar-dialog.component';
 import { ExcelService } from '../../services/excel.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -73,28 +74,28 @@ import { catchError } from 'rxjs/operators';
 
       <!-- Stats -->
       <div class="row g-3 mb-4">
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Total Pieces</p>
-            <p class="h4 fw-bold text-dark mb-0">{{ totalItems() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Total Pieces</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-dark mb-0 text-truncate">{{ totalItems() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Live Available</p>
-            <p class="h4 fw-bold text-success mb-0">{{ availableItems() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Live Available</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-success mb-0 text-truncate">{{ availableItems() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">In Rental</p>
-            <p class="h4 fw-bold text-primary mb-0">{{ rentedItems() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">In Rental</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-primary mb-0 text-truncate">{{ rentedItems() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">System Health</p>
-            <p class="h4 fw-bold text-info mb-0">{{ utilizationRate() }}% Active</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">System Health</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-info mb-0 text-truncate">{{ utilizationRate() }}% Active</p>
           </div>
         </div>
       </div>
@@ -149,7 +150,8 @@ import { catchError } from 'rxjs/operators';
                 <th class="px-4 py-3 border-0">Equipment</th>
                 <th class="px-4 py-3 border-0">SKU</th>
                 <th class="px-4 py-3 border-0">Category</th>
-                <th class="px-4 py-3 border-0">Stock / Availability</th>
+                <th class="px-4 py-3 border-0">Stock</th>
+                <th class="px-4 py-3 border-0">Availability</th>
                 <th class="px-4 py-3 border-0">Rates (Day/Week)</th>
                 <th class="px-4 py-3 border-0">Condition</th>
                 <th class="px-4 py-3 border-0">Live Status</th>
@@ -174,6 +176,12 @@ import { catchError } from 'rxjs/operators';
                       [style.width.%]="(getCalculatedAvailability(item) / item.total_quantity) * 100"
                     ></div>
                   </div>
+                </td>
+                <td class="px-4 py-3">
+                  <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" (click)="openCalendarDialog(item)">
+                    <svg width="16" height="16" fill="none" class="text-primary" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Check Calendar
+                  </button>
                 </td>
                 <td class="px-4 py-3 small fw-medium text-dark">
                   <div class="text-dark">{{ item.daily_rate | currency:'INR':'symbol' }}</div>
@@ -397,6 +405,17 @@ export class InventoryComponent implements OnInit {
         this.refreshData();
         this.snackBar.open('Item deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
+    });
+  }
+
+  openCalendarDialog(item: RentalItem) {
+    this.dialog.open(ItemAvailabilityCalendarDialogComponent, {
+      width: '600px',
+      data: {
+        item: item,
+        bookings: this.bookings()
+      },
+      panelClass: 'custom-dialog-container'
     });
   }
 

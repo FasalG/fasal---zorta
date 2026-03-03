@@ -28,28 +28,28 @@ import { ExpenseFormDialogComponent } from '../../features/expenses/components/e
 
       <!-- Stats -->
       <div class="row g-3 mb-4">
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Total Expenses (Paid)</p>
-            <p class="h4 fw-bold text-danger mb-0">{{ totalPaidExpenses() | currency:'INR':'symbol' }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Total Expenses (Paid)</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-danger mb-0 text-truncate">{{ totalPaidExpenses() | currency:'INR':'symbol' }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Pending Payments</p>
-            <p class="h4 fw-bold text-warning-emphasis mb-0">{{ totalPendingExpenses() | currency:'INR':'symbol' }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Pending Payments</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-warning-emphasis mb-0 text-truncate">{{ totalPendingExpenses() | currency:'INR':'symbol' }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Approved for Payment</p>
-            <p class="h4 fw-bold text-primary mb-0">{{ totalApprovedExpenses() | currency:'INR':'symbol' }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Approved for Payment</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-primary mb-0 text-truncate">{{ totalApprovedExpenses() | currency:'INR':'symbol' }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Total Records</p>
-            <p class="h4 fw-bold text-dark mb-0">{{ expenses().length }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Total Records</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-dark mb-0 text-truncate">{{ expenses().length }}</p>
           </div>
         </div>
       </div>

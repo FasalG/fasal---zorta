@@ -56,7 +56,7 @@ import { AuthService } from '../../../services/auth.service';
                     <div *ngIf="f['email'].errors['email']">Email must be a valid email address</div>
                   </div>
                 </div>
-
+ 
                 <div class="mb-4">
                   <div class="d-flex justify-content-between align-items-center mb-1">
                     <label class="form-label small fw-bold text-secondary mb-0">Password</label>

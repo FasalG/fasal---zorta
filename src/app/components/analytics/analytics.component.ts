@@ -49,8 +49,8 @@ interface TopItem {
 
       <!-- Key Metrics -->
       <div class="row g-4 mb-4">
-        <div *ngFor="let metric of metrics" class="col-12 col-md-6 col-lg-3">
-          <div class="card shadow-sm border-0 p-4 h-100">
+        <div *ngFor="let metric of metrics" class="col-6 col-md-6 col-lg-3">
+          <div class="card shadow-sm border-0 p-3 h-100">
             <div class="d-flex align-items-center justify-content-between mb-3">
               <div [class]="'p-3 rounded-3 ' + metric.color + ' text-white shadow-sm'">
                 <!-- Icon logic based on title -->
@@ -135,7 +135,7 @@ interface TopItem {
       <div class="row g-4 mb-4">
         <!-- Category Revenue Bar Chart -->
         <div class="col-12 col-lg-6">
-          <div class="card shadow-sm border-0 p-4 h-100">
+          <div class="card shadow-sm border-0 p-3 h-100">
             <h3 class="h5 fw-bold text-dark mb-4">Revenue by Category</h3>
             <div class="d-flex flex-column gap-4">
               <div *ngFor="let cat of categoryRevenue">
@@ -154,7 +154,7 @@ interface TopItem {
 
         <!-- Weekly Utilization Bar Chart -->
         <div class="col-12 col-lg-6">
-          <div class="card shadow-sm border-0 p-4 h-100">
+          <div class="card shadow-sm border-0 p-3 h-100">
             <h3 class="h5 fw-bold text-dark mb-4">Equipment Utilization (Monthly)</h3>
             <div class="d-flex align-items-end justify-content-between h-100 pb-2" style="min-height: 200px;">
               <div *ngFor="let week of utilizationData" class="d-flex flex-column align-items-center gap-2" style="width: 20%;">

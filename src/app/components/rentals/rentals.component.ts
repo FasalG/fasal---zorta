@@ -32,28 +32,28 @@ import { catchError } from 'rxjs/operators';
 
       <!-- Stats -->
       <div class="row g-3 mb-4">
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Active Rentals</p>
-            <p class="h4 fw-bold text-primary mb-0">{{ activeCount() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Active Rentals</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-primary mb-0 text-truncate">{{ activeCount() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Overdue</p>
-            <p class="h4 fw-bold text-danger mb-0">{{ overdueCount() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Overdue</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-danger mb-0 text-truncate">{{ overdueCount() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Active Revenue</p>
-            <p class="h4 fw-bold text-success mb-0">{{ totalRevenue() | currency:'INR':'symbol' }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Active Revenue</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-success mb-0 text-truncate">{{ totalRevenue() | currency:'INR':'symbol' }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Unpaid Amount</p>
-            <p class="h4 fw-bold text-warning-emphasis mb-0">{{ unpaidAmount() | currency:'INR':'symbol' }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Unpaid Amount</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-warning-emphasis mb-0 text-truncate">{{ unpaidAmount() | currency:'INR':'symbol' }}</p>
           </div>
         </div>
       </div>

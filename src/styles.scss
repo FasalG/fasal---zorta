@@ -77,6 +77,19 @@
   }
 }
 
+/* Fix Datepicker Background Globally */
+.mat-datepicker-content,
+.mat-calendar,
+.mat-datepicker-content-container {
+  background-color: #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.bg-white-datepicker {
+  background-color: #ffffff !important;
+}
+
 /* Button & Action Styling */
 .mat-mdc-dialog-actions {
   padding: 24px 32px !important;

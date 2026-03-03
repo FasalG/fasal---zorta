@@ -33,28 +33,28 @@ import { catchError } from 'rxjs/operators';
 
       <!-- Stats -->
       <div class="row g-3 mb-4">
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Active Bookings</p>
-            <p class="h4 fw-bold text-success mb-0">{{ activeCount() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Active Bookings</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-success mb-0 text-truncate">{{ activeCount() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Pending Confirmation</p>
-            <p class="h4 fw-bold text-warning-emphasis mb-0">{{ pendingCount() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Pending Confirmation</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-warning-emphasis mb-0 text-truncate">{{ pendingCount() }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Total Booking Value</p>
-            <p class="h4 fw-bold text-primary mb-0">{{ totalBookingValue() | currency:'INR':'symbol' }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Total Booking Value</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-primary mb-0 text-truncate">{{ totalBookingValue() | currency:'INR':'symbol' }}</p>
           </div>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-6 col-md-3">
           <div class="card shadow-sm border-0 p-3 h-100">
-            <p class="text-secondary small mb-1">Cancelled</p>
-            <p class="h4 fw-bold text-danger mb-0">{{ cancelledCount() }}</p>
+            <p class="text-secondary small mb-1 text-truncate" title="Metric">Cancelled</p>
+            <p class="h4 fw-bold fs-5 fs-md-4 text-danger mb-0 text-truncate">{{ cancelledCount() }}</p>
           </div>
         </div>
       </div>
@@ -122,6 +122,12 @@ import { catchError } from 'rxjs/operators';
                     <button class="btn btn-sm btn-outline-info p-1 border-0" title="Download Receipt" *ngIf="booking.initial_payment_received > 0" (click)="downloadReceipt(booking)">
                       <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </button>
+                    <!-- WhatsApp Button -->
+                    <button class="btn btn-sm text-success p-1 border-0" title="Send WhatsApp Confirmation" (click)="sendWhatsAppConfirmation(booking)">
+                      <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
                       </svg>
                     </button>
 
@@ -246,34 +252,29 @@ export class BookingsComponent implements OnInit {
         booking: booking ? { ...booking } : this.getEmptyBooking(),
         isEditing: !!booking,
         customers: this.customers(),
-        items: this.items()
+        items: this.items(),
+        bookings: this.bookings()
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        if (booking) {
-          this.bookingService.update(result as Booking).subscribe({
-            next: () => {
-              this.loadBookings();
-              this.snackBar.open('Booking updated successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
-            },
-            error: (err) => this.snackBar.open(err.error?.message || 'Failed to update booking', 'Close', { duration: 4000, panelClass: ['bg-danger', 'text-white'] })
-          });
-        } else {
-          const newBooking = {
-            ...result,
-            booking_number: this.bookingService.generateCode('BOK'),
-            created_at: new Date().toISOString()
-          } as Booking;
-          this.bookingService.add(newBooking).subscribe({
-            next: () => {
-              this.loadBookings();
-              this.snackBar.open('Booking created successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
-            },
-            error: (err) => this.snackBar.open(err.error?.message || 'Failed to create booking', 'Close', { duration: 4000, panelClass: ['bg-danger', 'text-white'] })
-          });
-        }
+        this.loadData();
+
+        // We prompt the user using a snackbar action if they want to send WhatsApp for the newly created/saved booking
+        const snack = this.snackBar.open('Booking saved successfully.', 'Send WhatsApp', { duration: 6000, panelClass: ['success-snackbar'] });
+        snack.onAction().subscribe(() => {
+          // Locate newly added booking or use result object
+          let targetBooking = result.booking || null;
+          // If direct object is not returned from popup, fetch the most recent one by this customer just inserted:
+          // As a fallback, we can use the latest returned booking data. For simplicity let's pass formatting text.
+          // Assumes "result" contains the saved booking data object. If it doesn't, they can just click the table row.
+          if (targetBooking) {
+            this.sendWhatsAppConfirmation(targetBooking);
+          } else {
+            this.snackBar.open('Please click the WhatsApp icon next to the booking row to send confirmation.', 'Close', { duration: 4000 });
+          }
+        });
       }
     });
   }
@@ -330,5 +331,57 @@ export class BookingsComponent implements OnInit {
       },
       error: () => this.snackBar.open('Failed to download receipt', 'Close', { duration: 4000, panelClass: ['bg-danger', 'text-white'] })
     });
+  }
+
+  sendWhatsAppConfirmation(booking: Booking) {
+    let customerObj = booking.customer;
+    if (typeof customerObj === 'string') {
+      customerObj = this.customers().find(c => (c._id || c.id) === customerObj);
+    }
+
+    if (!customerObj || !customerObj.phone) {
+      this.snackBar.open('Customer phone number not found', 'Close', { duration: 3000, panelClass: ['bg-warning', 'text-dark'] });
+      return;
+    }
+
+    const phone = customerObj.phone.replace(/[^0-9]/g, '');
+    let finalPhone = phone;
+    // Basic formatting assuming Indian +91 if length is 10
+    if (finalPhone.length === 10) {
+      finalPhone = '91' + finalPhone;
+    } else if (!finalPhone.startsWith('91') && finalPhone.length > 10) {
+      // Just use whatever they provided if it has country code
+    }
+
+    // Construct items string
+    const itemsText = booking.items.map(i => {
+      const itemName = this.getItemName(i.item);
+      return `- ${itemName} (Qty: ${i.quantity})`;
+    }).join('\n'); // Standard newline
+
+    const startDate = new Date(booking.start_date).toLocaleDateString();
+    const endDate = new Date(booking.end_date).toLocaleDateString();
+
+    const rawMessage = `Hello ${customerObj.name},
+
+Thank you for your booking with us.
+
+*Booking Details:*
+Booking #: ${booking.booking_number}
+Start Date: ${startDate}
+End Date: ${endDate}
+
+*Items:*
+${itemsText}
+
+*Total Amount:* ₹${booking.amount}
+*Amount Paid:* ₹${booking.initial_payment_received}
+*Balance Due:* ₹${booking.amount - booking.initial_payment_received}
+
+We look forward to serving you!`;
+
+    const formattedMessage = encodeURIComponent(rawMessage);
+    const whatsappUrl = `https://wa.me/${finalPhone}?text=${formattedMessage}`;
+    window.open(whatsappUrl, '_blank');
   }
 }
