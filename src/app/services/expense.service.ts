@@ -1,35 +1,57 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../core/services/api.service';
 import { Expense } from '../models/rental.models';
 import { Observable } from 'rxjs';
+import { Endpoints } from '../core/constants/endpoints';
+import { HttpMethod } from '../core/enums/httpmethod.enum';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ExpenseService {
-    private readonly endpoint = 'expenses';
-
-    constructor(private api: ApiService) { }
+    private api = inject(ApiService);
+    private readonly cacheTag = 'expenses';
 
     getAll(): Observable<Expense[]> {
-        return this.api.get<Expense[]>(this.endpoint);
+        return this.api.HttpRequestHandler<Expense[]>({
+            method: HttpMethod.GET,
+            endpoint: Endpoints.EXPENSES.BASE,
+            cacheTags: [this.cacheTag]
+        });
     }
 
     getById(id: string): Observable<Expense> {
-        return this.api.get<Expense>(`${this.endpoint}/${id}`);
+        return this.api.HttpRequestHandler<Expense>({
+            method: HttpMethod.GET,
+            endpoint: `${Endpoints.EXPENSES.BASE}/${id}`,
+        });
     }
 
     add(item: Expense): Observable<Expense> {
-        return this.api.post<Expense>(this.endpoint, item);
+        return this.api.HttpRequestHandler<Expense>({
+            method: HttpMethod.POST,
+            endpoint: Endpoints.EXPENSES.BASE,
+            body: item,
+            invalidateTags: [this.cacheTag]
+        });
     }
 
     update(item: Expense): Observable<Expense> {
         const id = item._id || item.id;
-        return this.api.put<Expense>(`${this.endpoint}/${id}`, item);
+        return this.api.HttpRequestHandler<Expense>({
+            method: HttpMethod.PUT,
+            endpoint: `${Endpoints.EXPENSES.BASE}/${id}`,
+            body: item,
+            invalidateTags: [this.cacheTag]
+        });
     }
 
     delete(id: string): Observable<any> {
-        return this.api.delete(`${this.endpoint}/${id}`);
+        return this.api.HttpRequestHandler<any>({
+            method: HttpMethod.DELETE,
+            endpoint: `${Endpoints.EXPENSES.BASE}/${id}`,
+            invalidateTags: [this.cacheTag]
+        });
     }
 
     generateCode(prefix: string): string {

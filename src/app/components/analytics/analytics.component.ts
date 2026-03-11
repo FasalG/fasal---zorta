@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { CommonModule } from '@angular/common';
 
 interface Metric {
@@ -39,7 +41,7 @@ interface TopItem {
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatTableModule, MatPaginatorModule],
   template: `
     <div class="container-fluid py-4">
       <div class="mb-4">
@@ -178,43 +180,54 @@ interface TopItem {
           <p class="small text-secondary mb-0">Best performing rental items this month</p>
         </div>
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light text-secondary small text-uppercase fw-medium text-nowrap">
-              <tr>
-                <th class="px-4 py-3 border-0">Rank</th>
-                <th class="px-4 py-3 border-0">Item Name</th>
-                <th class="px-4 py-3 border-0 text-center">Rentals</th>
-                <th class="px-4 py-3 border-0 text-end">Revenue</th>
-                <th class="px-4 py-3 border-0 text-center">Utilization</th>
-                <th class="px-4 py-3 border-0" style="min-width: 150px;">Performance</th>
-              </tr>
-            </thead>
-            <tbody class="border-top-0">
-              <tr *ngFor="let item of topItems; let i = index">
-                <td class="px-4 py-3">
-                  <div [class]="getRankClass(i)">{{ i + 1 }}</div>
-                </td>
-                <td class="px-4 py-3 small fw-bold text-dark">{{ item.name }}</td>
-                <td class="px-4 py-3 small text-center">{{ item.rentals }}</td>
-                <td class="px-4 py-3 small fw-bold text-dark text-end">{{ item.revenue | currency:'INR':'symbol':'1.0-0' }}</td>
-                <td class="px-4 py-3 text-center">
-                  <span [class]="getUtilBadgeClass(item.utilization)">
-                    {{ item.utilization }}%
-                  </span>
-                </td>
-                <td class="px-4 py-3">
-                  <div class="d-flex align-items-center gap-2">
-                    <div class="progress flex-grow-1" style="height: 6px; background-color: #f1f3f5;">
-                      <div class="progress-bar bg-success rounded" [style.width.%]="item.utilization"></div>
-                    </div>
-                    <svg class="text-success" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
+          <table mat-table [dataSource]="dataSource" class="w-100 table-hover align-middle mb-0">
+            <ng-container matColumnDef="rank">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">Rank</th>
+              <td mat-cell *matCellDef="let item; let i = index" class="px-4 py-3">
+                <div [class]="getRankClass(i)">{{ i + 1 }}</div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">Item Name</th>
+              <td mat-cell *matCellDef="let item" class="px-4 py-3 small fw-bold text-dark">{{ item.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="rentals">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0 text-center">Rentals</th>
+              <td mat-cell *matCellDef="let item" class="px-4 py-3 small text-center">{{ item.rentals }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="revenue">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0 text-end">Revenue</th>
+              <td mat-cell *matCellDef="let item" class="px-4 py-3 small fw-bold text-dark text-end">{{ item.revenue | currency:'INR':'symbol':'1.0-0' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="utilization">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0 text-center">Utilization</th>
+              <td mat-cell *matCellDef="let item" class="px-4 py-3 text-center">
+                <span [class]="getUtilBadgeClass(item.utilization)">{{ item.utilization }}%</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="performance">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0" style="min-width: 150px;">Performance</th>
+              <td mat-cell *matCellDef="let item" class="px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1" style="height: 6px; background-color: #f1f3f5;">
+                    <div class="progress-bar bg-success rounded" [style.width.%]="item.utilization"></div>
                   </div>
-                </td>
-              </tr>
-            </tbody>
+                  <svg class="text-success" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-light text-secondary small text-uppercase fw-medium text-nowrap"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover-bg-light"></tr>
           </table>
+          <mat-paginator [pageSizeOptions]="[10, 25, 50]" [pageSize]="10" showFirstLastButtons></mat-paginator>
         </div>
       </div>
 
@@ -268,7 +281,16 @@ interface TopItem {
     }
   `]
 })
-export class AnalyticsComponent {
+export class AnalyticsComponent implements AfterViewInit {
+  displayedColumns: string[] = ['rank', 'name', 'rentals', 'revenue', 'utilization', 'performance'];
+  dataSource = new MatTableDataSource<any>([]);
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  ngAfterViewInit() {
+    this.dataSource.data = this.topItems;
+    this.dataSource.paginator = this.paginator;
+  }
+
   monthlyRevenue: MonthlyData[] = [
     { month: "JUL", revenue: 42000, rentals: 85, utilization: 68 },
     { month: "AUG", revenue: 48000, rentals: 92, utilization: 72 },

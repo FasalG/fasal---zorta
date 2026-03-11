@@ -1,31 +1,49 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../core/services/api.service';
 import { BankDetail } from '../models/rental.models';
 import { Observable } from 'rxjs';
+import { Endpoints } from '../core/constants/endpoints';
+import { HttpMethod } from '../core/enums/httpmethod.enum';
 
 @Injectable({
     providedIn: 'root'
 })
 export class BankDetailService {
-    constructor(private apiService: ApiService) { }
+    private api = inject(ApiService);
+    private readonly cacheTag = 'bank-details';
 
     getAll(): Observable<BankDetail[]> {
-        return this.apiService.get<BankDetail[]>('bank-details');
+        return this.api.HttpRequestHandler<BankDetail[]>({
+            method: HttpMethod.GET,
+            endpoint: Endpoints.BANK_DETAILS.BASE,
+            cacheTags: [this.cacheTag]
+        });
     }
 
-    getById(id: string): Observable<BankDetail> {
-        return this.apiService.get<BankDetail>(`bank-details/${id}`);
+    add(item: BankDetail): Observable<BankDetail> {
+        return this.api.HttpRequestHandler<BankDetail>({
+            method: HttpMethod.POST,
+            endpoint: Endpoints.BANK_DETAILS.BASE,
+            body: item,
+            invalidateTags: [this.cacheTag]
+        });
     }
 
-    add(bankDetail: BankDetail): Observable<BankDetail> {
-        return this.apiService.post<BankDetail>('bank-details', bankDetail);
-    }
-
-    update(bankDetail: BankDetail): Observable<BankDetail> {
-        return this.apiService.put<BankDetail>(`bank-details/${bankDetail._id || bankDetail.id}`, bankDetail);
+    update(item: BankDetail): Observable<BankDetail> {
+        const id = item._id || item.id;
+        return this.api.HttpRequestHandler<BankDetail>({
+            method: HttpMethod.PUT,
+            endpoint: `${Endpoints.BANK_DETAILS.BASE}/${id}`,
+            body: item,
+            invalidateTags: [this.cacheTag]
+        });
     }
 
     delete(id: string): Observable<any> {
-        return this.apiService.delete(`bank-details/${id}`);
+        return this.api.HttpRequestHandler<any>({
+            method: HttpMethod.DELETE,
+            endpoint: `${Endpoints.BANK_DETAILS.BASE}/${id}`,
+            invalidateTags: [this.cacheTag]
+        });
     }
 }

@@ -1,4 +1,6 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, ViewChild } from '@angular/core';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -28,7 +30,7 @@ import { catchError } from 'rxjs/operators';
     MatDatepickerModule,
     MatNativeDateModule,
     RouterModule
-  ],
+  , MatTableModule, MatPaginatorModule],
   template: `
     <!-- Loader -->
     <div class="text-center py-5 my-5" *ngIf="isLoading()">
@@ -150,36 +152,48 @@ import { catchError } from 'rxjs/operators';
             <button routerLink="/bookings" class="btn btn-sm btn-link text-decoration-none fw-semibold">View All</button>
           </div>
           <div class="table-responsive p-0">
-            <table class="table table-hover align-middle mt-3 mb-0">
-              <thead class="table-light text-secondary small text-uppercase">
-                <tr>
-                  <th class="px-4 py-3 border-0">Item</th>
-                  <th class="px-4 py-3 border-0">Customer</th>
-                  <th class="px-4 py-3 border-0">End Date</th>
-                  <th class="px-4 py-3 border-0">Amount</th>
-                  <th class="px-4 py-3 border-0">Status</th>
-                </tr>
-              </thead>
-              <tbody class="border-top-0">
-                <tr *ngFor="let booking of recentRentals()" class="small">
-                  <td class="px-4 py-3 fw-medium text-dark">
-                    {{ getItemName(booking.items[0]?.item) }}
-                    <span *ngIf="booking.items.length > 1" class="text-secondary smaller ms-1">+{{ booking.items.length - 1 }}</span>
-                  </td>
-                  <td class="px-4 py-3 text-secondary">{{ getCustomerName(booking.customer) }}</td>
-                  <td class="px-4 py-3 text-secondary">{{ booking.end_date | date:'mediumDate' }}</td>
-                  <td class="px-4 py-3 fw-bold text-dark">{{ booking.amount | currency:'INR':'symbol' }}</td>
-                  <td class="px-4 py-3">
-                    <span [class]="booking.status === 'closed' ? 'badge bg-secondary' : 'badge bg-success-subtle text-success'">
-                      {{ booking.status | titlecase }}
-                    </span>
-                  </td>
-                </tr>
-                <tr *ngIf="recentRentals().length === 0">
-                  <td colspan="5" class="text-center py-4 text-secondary">No recent bookings found.</td>
-                </tr>
-              </tbody>
+            <table mat-table [dataSource]="dataSource" class="w-100 table-hover align-middle mt-3 mb-0" *ngIf="recentRentals().length > 0">
+              <ng-container matColumnDef="item">
+                <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">Item</th>
+                <td mat-cell *matCellDef="let booking" class="px-4 py-3 fw-medium text-dark">
+                  {{ getItemName(booking.items[0]?.item) }}
+                  <span *ngIf="booking.items.length > 1" class="text-secondary smaller ms-1">+{{ booking.items.length - 1 }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="customer">
+                <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">Customer</th>
+                <td mat-cell *matCellDef="let booking" class="px-4 py-3 text-secondary">{{ getCustomerName(booking.customer) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="end_date">
+                <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">End Date</th>
+                <td mat-cell *matCellDef="let booking" class="px-4 py-3 text-secondary">{{ booking.end_date | date:'mediumDate' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">Amount</th>
+                <td mat-cell *matCellDef="let booking" class="px-4 py-3 fw-bold text-dark">{{ booking.amount | currency:'INR':'symbol' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">Status</th>
+                <td mat-cell *matCellDef="let booking" class="px-4 py-3">
+                  <span [class]="booking.status === 'closed' ? 'badge bg-secondary' : 'badge bg-success-subtle text-success'">
+                    {{ booking.status | titlecase }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-light text-secondary small text-uppercase"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="small"></tr>
             </table>
+
+            <div *ngIf="recentRentals().length === 0" class="text-center py-4 text-secondary">
+              No recent bookings found.
+            </div>
+            
+            <mat-paginator [class.d-none]="recentRentals().length === 0" [pageSizeOptions]="[10, 25, 50]" [pageSize]="10" showFirstLastButtons></mat-paginator>
           </div>
         </div>
       </div>
@@ -216,6 +230,19 @@ import { catchError } from 'rxjs/operators';
   `]
 })
 export class DashboardComponent implements OnInit {
+  displayedColumns: string[] = ['item', 'customer', 'end_date', 'amount', 'status'];
+  dataSource = new MatTableDataSource<any>([]);
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  constructor() {
+    effect(() => {
+      this.dataSource.data = this.recentRentals();
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
+    });
+  }
+
   isLoading = signal(true);
   items = signal<RentalItem[]>([]);
   bookings = signal<Booking[]>([]);

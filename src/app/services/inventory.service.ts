@@ -1,38 +1,65 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../core/services/api.service';
 import { RentalItem } from '../models/rental.models';
 import { Observable } from 'rxjs';
+import { Endpoints } from '../core/constants/endpoints';
+import { HttpMethod } from '../core/enums/httpmethod.enum';
 
 @Injectable({
     providedIn: 'root'
 })
 export class InventoryService {
-    private readonly endpoint = 'items';
-
-    constructor(private api: ApiService) { }
+    private api = inject(ApiService);
+    private readonly cacheTag = 'items';
 
     getAll(): Observable<RentalItem[]> {
-        return this.api.get<RentalItem[]>(this.endpoint);
+        return this.api.HttpRequestHandler<RentalItem[]>({
+            method: HttpMethod.GET,
+            endpoint: Endpoints.INVENTORY.BASE,
+            cacheTags: [this.cacheTag]
+        });
     }
 
     getById(id: string): Observable<RentalItem> {
-        return this.api.get<RentalItem>(`${this.endpoint}/${id}`);
+        return this.api.HttpRequestHandler<RentalItem>({
+            method: HttpMethod.GET,
+            endpoint: `${Endpoints.INVENTORY.BASE}/${id}`,
+        });
     }
 
     add(item: RentalItem): Observable<RentalItem> {
-        return this.api.post<RentalItem>(this.endpoint, item);
+        return this.api.HttpRequestHandler<RentalItem>({
+            method: HttpMethod.POST,
+            endpoint: Endpoints.INVENTORY.BASE,
+            body: item,
+            invalidateTags: [this.cacheTag]
+        });
     }
 
     bulkAdd(items: RentalItem[]): Observable<RentalItem[]> {
-        return this.api.post<RentalItem[]>(`${this.endpoint}/bulk`, items);
+        return this.api.HttpRequestHandler<RentalItem[]>({
+            method: HttpMethod.POST,
+            endpoint: Endpoints.INVENTORY.BULK,
+            body: items,
+            invalidateTags: [this.cacheTag]
+        });
     }
 
     update(item: RentalItem): Observable<RentalItem> {
         const id = item._id || item.id;
-        return this.api.put<RentalItem>(`${this.endpoint}/${id}`, item);
+        return this.api.HttpRequestHandler<RentalItem>({
+            method: HttpMethod.PUT,
+            endpoint: `${Endpoints.INVENTORY.BASE}/${id}`,
+            body: item,
+            invalidateTags: [this.cacheTag]
+        });
     }
 
     delete(id: string): Observable<any> {
-        return this.api.delete(`${this.endpoint}/${id}`);
+        return this.api.HttpRequestHandler<any>({
+            method: HttpMethod.DELETE,
+            endpoint: `${Endpoints.INVENTORY.BASE}/${id}`,
+            invalidateTags: [this.cacheTag]
+        });
     }
 }

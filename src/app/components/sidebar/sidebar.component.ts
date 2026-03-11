@@ -20,11 +20,11 @@ interface MenuItem {
           <h1 class="h4 fw-bold mb-0 text-truncate" [title]="authService.currentUser()?.companyDetails?.name || 'Rental ERP'">
             {{ authService.currentUser()?.companyDetails?.name || 'Rental ERP' }}
           </h1>
-          <p class="small mb-0 opacity-75">Management System</p>
+        
         </div>
       </div>
 
-      <ul class="nav nav-pills flex-column mb-auto mt-3 gap-1">
+      <ul class="nav nav-pills flex-column flex-grow-1 mt-3 gap-1 overflow-y-auto hide-scrollbar">
         <li *ngFor="let item of menuItems" class="nav-item">
           <a
             [routerLink]="['/' + item.route]"
@@ -50,7 +50,7 @@ interface MenuItem {
         </li>
       </ul>
 
-      <div class="mt-auto p-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+      <div class="mt-3 p-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
         <div class="d-flex align-items-center gap-3 mb-3">
           <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(255,255,255,0.1);">
             <span class="fw-bold">{{ getInitials() }}</span>
@@ -72,6 +72,13 @@ interface MenuItem {
       color: rgba(255, 255, 255, 0.7) !important;
       font-weight: 500;
       letter-spacing: -0.01em;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
     }
     .sidebar-link:hover {
       background-color: rgba(255, 255, 255, 0.1);

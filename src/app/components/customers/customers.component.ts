@@ -273,7 +273,6 @@ export class CustomersComponent implements OnInit {
     snackBarRef.onAction().subscribe(() => {
       this.customerService.delete(id).subscribe(() => {
         this.loadCustomers();
-        this.snackBar.open('Customer deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
     });
   }

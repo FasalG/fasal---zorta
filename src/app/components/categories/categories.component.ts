@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatPaginatorModule, MatPaginator, PageEvent } from '@angular/material/paginator';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -11,7 +12,7 @@ import { ExcelService } from '../../services/excel.service';
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule, MatPaginatorModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -87,7 +88,7 @@ import { ExcelService } from '../../services/excel.service';
               </tr>
             </thead>
             <tbody class="border-top-0">
-              <tr *ngFor="let category of categories()" class="hover-bg-light">
+              <tr *ngFor="let category of paginatedCategories()" class="hover-bg-light">
                 <td class="px-4 py-3 small fw-bold text-dark">{{ category.name }}</td>
                 <td class="px-4 py-3 small text-secondary">{{ category.description }}</td>
                 <td class="px-4 py-3 text-end">
@@ -107,6 +108,12 @@ import { ExcelService } from '../../services/excel.service';
               </tr>
             </tbody>
           </table>
+          <mat-paginator 
+            [length]="categories().length" 
+            [pageSize]="pageSize()" 
+            [pageSizeOptions]="[10, 25, 50]" 
+            (page)="onPageChange($event)">
+          </mat-paginator>
         </div>
       </div>
     </div>
@@ -117,6 +124,19 @@ import { ExcelService } from '../../services/excel.service';
   `]
 })
 export class CategoriesComponent implements OnInit {
+  pageIndex = signal(0);
+  pageSize = signal(10);
+
+  paginatedCategories = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.categories().slice(start, start + this.pageSize());
+  });
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
+  }
+
   isLoading = signal(true);
   categories = signal<Category[]>([]);
   isImporting = signal(false);
@@ -177,7 +197,6 @@ export class CategoriesComponent implements OnInit {
     snackBarRef.onAction().subscribe(() => {
       this.categoryService.delete(id).subscribe(() => {
         this.loadCategories();
-        this.snackBar.open('Category deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
     });
   }
@@ -242,21 +261,19 @@ export class CategoriesComponent implements OnInit {
       if (validCategories.length > 0) {
         this.categoryService.bulkAdd(validCategories).subscribe({
           next: () => {
-            this.loadCategories();
-            this.snackBar.open(`Successfully imported ${validCategories.length} categories!`, 'Close', { duration: 4000, panelClass: ['success-snackbar'] });
             this.isImporting.set(false);
             event.target.value = '';
           },
           error: (err) => {
             console.error('Import error:', err);
-            this.snackBar.open('Failed to import categories. There might be a backend error.', 'Close', { duration: 5000, panelClass: ['bg-danger', 'text-white'] });
+            // Let ApiService handle the error snackbar
             this.isImporting.set(false);
             event.target.value = '';
           }
         });
       }
     } catch (err: any) {
-      this.snackBar.open(`Error reading file: ${err.message}`, 'Close', { duration: 5000, panelClass: ['bg-danger', 'text-white'] });
+      // Error handled.
       this.isImporting.set(false);
       event.target.value = '';
     }

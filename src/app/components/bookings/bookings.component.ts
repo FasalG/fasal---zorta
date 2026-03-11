@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+import { MatPaginatorModule, MatPaginator, PageEvent } from '@angular/material/paginator';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -15,7 +16,7 @@ import { catchError } from 'rxjs/operators';
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule, MatPaginatorModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -87,7 +88,7 @@ import { catchError } from 'rxjs/operators';
               </tr>
             </thead>
             <tbody class="border-top-0">
-              <tr *ngFor="let booking of bookings()" class="hover-bg-light">
+              <tr *ngFor="let booking of paginatedBookings()" class="hover-bg-light">
                 <td class="px-4 py-3 small fw-medium text-dark">{{ booking.booking_number }}</td>
                 <td class="px-4 py-3 small text-secondary">{{ getCustomerName(booking.customer) }}</td>
                 <td class="px-4 py-3 small fw-medium text-dark">
@@ -124,13 +125,11 @@ import { catchError } from 'rxjs/operators';
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </button>
-                    <!-- WhatsApp Button -->
                     <button class="btn btn-sm text-success p-1 border-0" title="Send WhatsApp Confirmation" (click)="sendWhatsAppConfirmation(booking)">
                       <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
                       </svg>
                     </button>
-
                     <button class="btn btn-sm btn-link p-1 text-primary" (click)="openBookingDialog(booking)">
                       <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -146,6 +145,12 @@ import { catchError } from 'rxjs/operators';
               </tr>
             </tbody>
           </table>
+          <mat-paginator 
+            [length]="bookings().length" 
+            [pageSize]="pageSize()" 
+            [pageSizeOptions]="[10, 25, 50]" 
+            (page)="onPageChange($event)">
+          </mat-paginator>
         </div>
       </div>
     </div>
@@ -156,6 +161,22 @@ import { catchError } from 'rxjs/operators';
   `]
 })
 export class BookingsComponent implements OnInit {
+  pageIndex = signal(0);
+  pageSize = signal(10);
+
+  paginatedBookings = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.bookings().slice(start, start + this.pageSize());
+  });
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
+  }
+
+  constructor() {
+  }
+
   isLoading = signal(true);
   bookings = signal<Booking[]>([]);
   customers = signal<Customer[]>([]);
@@ -294,7 +315,6 @@ export class BookingsComponent implements OnInit {
     snackBarRef.onAction().subscribe(() => {
       this.bookingService.delete(id).subscribe(() => {
         this.loadBookings();
-        this.snackBar.open('Booking cancelled successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
     });
   }

@@ -309,7 +309,6 @@ export class BankDetailsComponent implements OnInit {
     snackBarRef.onAction().subscribe(() => {
       this.bankService.delete((bank._id || bank.id)!).subscribe(() => {
         this.loadBankDetails();
-        this.snackBar.open('Bank account deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
     });
   }

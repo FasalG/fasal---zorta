@@ -1,4 +1,6 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, ViewChild } from '@angular/core';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -14,7 +16,7 @@ import { catchError } from 'rxjs/operators';
 @Component({
   selector: 'app-rentals',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule, MatTableModule, MatPaginatorModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -68,56 +70,74 @@ import { catchError } from 'rxjs/operators';
           <div class="mt-2 text-secondary small">Loading active rentals...</div>
         </div>
 
-        <div class="table-responsive" *ngIf="!isLoading()">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Rental #</th>
-                <th class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Customer</th>
-                <th class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Item</th>
-                <th class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Start Date</th>
-                <th class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Due Date</th>
-                <th class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Total</th>
-                <th class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Status</th>
-                <th class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Payment</th>
-                <th class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0 text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="border-top-0">
-              <tr *ngFor="let rental of rentals()" class="hover-bg-light">
-                <td class="px-4 py-3 small fw-medium text-dark">{{ rental.rental_number }}</td>
-                <td class="px-4 py-3 small text-secondary">{{ getCustomerName(rental.customer) }}</td>
-                <td class="px-4 py-3 small fw-medium text-dark">{{ getItemName(rental.item) }}</td>
-                <td class="px-4 py-3 small text-secondary text-nowrap">{{ rental.start_date }}</td>
-                <td class="px-4 py-3 small text-secondary text-nowrap">{{ rental.due_date }}</td>
-                <td class="px-4 py-3 small fw-bold text-dark">{{ rental.total_amount | currency:'INR':'symbol' }}</td>
-                <td class="px-4 py-3">
-                  <span [class]="getStatusClass(rental.status)">
-                    {{ rental.status | titlecase }}
-                  </span>
-                </td>
-                <td class="px-4 py-3">
-                  <span [class]="getPaymentStatusClass(rental.payment_status)">
-                    {{ rental.payment_status | titlecase }}
-                  </span>
-                </td>
-                <td class="px-4 py-3 text-end">
-                  <div class="d-flex align-items-center justify-content-end gap-1">
-                    <button class="btn btn-sm btn-link p-1 text-primary" (click)="openRentalDialog(rental)">
-                       <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                    <button class="btn btn-sm btn-link p-1 text-danger" (click)="deleteRental((rental._id || rental.id)!)">
-                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
+        <div class="table-responsive" [class.d-none]="isLoading()">
+          <table mat-table [dataSource]="dataSource" class="w-100 table-hover align-middle mb-0">
+            <ng-container matColumnDef="rental_number">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Rental #</th>
+              <td mat-cell *matCellDef="let rental" class="px-4 py-3 small fw-medium text-dark">{{ rental.rental_number }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="customer">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Customer</th>
+              <td mat-cell *matCellDef="let rental" class="px-4 py-3 small text-secondary">{{ getCustomerName(rental.customer) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="item">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Item</th>
+              <td mat-cell *matCellDef="let rental" class="px-4 py-3 small fw-medium text-dark">{{ getItemName(rental.item) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="start_date">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Start Date</th>
+              <td mat-cell *matCellDef="let rental" class="px-4 py-3 small text-secondary text-nowrap">{{ rental.start_date }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="due_date">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Due Date</th>
+              <td mat-cell *matCellDef="let rental" class="px-4 py-3 small text-secondary text-nowrap">{{ rental.due_date }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="total_amount">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Total</th>
+              <td mat-cell *matCellDef="let rental" class="px-4 py-3 small fw-bold text-dark">{{ rental.total_amount | currency:'INR':'symbol' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Status</th>
+              <td mat-cell *matCellDef="let rental" class="px-4 py-3">
+                <span [class]="getStatusClass(rental.status)">{{ rental.status | titlecase }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="payment_status">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0">Payment</th>
+              <td mat-cell *matCellDef="let rental" class="px-4 py-3">
+                <span [class]="getPaymentStatusClass(rental.payment_status)">{{ rental.payment_status | titlecase }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 text-secondary small text-uppercase fw-medium border-0 text-end">Actions</th>
+              <td mat-cell *matCellDef="let rental" class="px-4 py-3 text-end">
+                <div class="d-flex align-items-center justify-content-end gap-1">
+                  <button class="btn btn-sm btn-link p-1 text-primary" (click)="openRentalDialog(rental)">
+                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button class="btn btn-sm btn-link p-1 text-danger" (click)="deleteRental((rental._id || rental.id)!)">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-light"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover-bg-light"></tr>
           </table>
+          <mat-paginator [pageSizeOptions]="[10, 25, 50]" [pageSize]="10" showFirstLastButtons></mat-paginator>
         </div>
       </div>
     </div>
@@ -127,6 +147,19 @@ import { catchError } from 'rxjs/operators';
   `]
 })
 export class RentalsComponent implements OnInit {
+  displayedColumns: string[] = ['rental_number', 'customer', 'item', 'start_date', 'due_date', 'total_amount', 'status', 'payment_status', 'actions'];
+  dataSource = new MatTableDataSource<any>([]);
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  constructor() {
+    effect(() => {
+      this.dataSource.data = this.rentals();
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
+    });
+  }
+
   isLoading = signal(true);
   rentals = signal<Rental[]>([]);
   customers = signal<Customer[]>([]);
@@ -154,7 +187,7 @@ export class RentalsComponent implements OnInit {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
-  constructor() { }
+  
 
   ngOnInit() {
     this.loadData();
@@ -278,7 +311,6 @@ export class RentalsComponent implements OnInit {
     snackBarRef.onAction().subscribe(() => {
       this.rentalService.delete(id).subscribe(() => {
         this.loadRentals();
-        this.snackBar.open('Rental deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
     });
   }

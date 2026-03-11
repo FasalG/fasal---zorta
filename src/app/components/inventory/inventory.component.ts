@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+import { MatPaginatorModule, MatPaginator, PageEvent } from '@angular/material/paginator';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -17,7 +18,7 @@ import { catchError } from 'rxjs/operators';
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule, MatPaginatorModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -159,7 +160,7 @@ import { catchError } from 'rxjs/operators';
               </tr>
             </thead>
             <tbody class="border-top-0">
-              <tr *ngFor="let item of filteredItems()" class="hover-bg-light">
+              <tr *ngFor="let item of paginatedItems()" class="hover-bg-light">
                 <td class="px-4 py-3 small fw-medium text-dark">{{ item.name }}</td>
                 <td class="px-4 py-3 small text-secondary">{{ item.sku }}</td>
                 <td class="px-4 py-3 small text-secondary">{{ getCategoryName(item.category) }}</td>
@@ -188,14 +189,10 @@ import { catchError } from 'rxjs/operators';
                   <div class="text-muted smaller">{{ item.weekly_rate | currency:'INR':'symbol' }}</div>
                 </td>
                 <td class="px-4 py-3">
-                  <span [class]="getConditionClass(item.condition)">
-                    {{ item.condition }}
-                  </span>
+                  <span [class]="getConditionClass(item.condition)">{{ item.condition }}</span>
                 </td>
                 <td class="px-4 py-3">
-                  <span [class]="getCalculatedStatusClass(item)">
-                    {{ getCalculatedStatus(item) | titlecase }}
-                  </span>
+                  <span [class]="getCalculatedStatusClass(item)">{{ getCalculatedStatus(item) | titlecase }}</span>
                 </td>
                 <td class="px-4 py-3 text-end">
                   <div class="d-flex align-items-center justify-content-end gap-1">
@@ -214,6 +211,12 @@ import { catchError } from 'rxjs/operators';
               </tr>
             </tbody>
           </table>
+          <mat-paginator 
+            [length]="filteredItems().length" 
+            [pageSize]="pageSize()" 
+            [pageSizeOptions]="[10, 25, 50]" 
+            (page)="onPageChange($event)">
+          </mat-paginator>
         </div>
       </div>
     </div>
@@ -225,6 +228,21 @@ import { catchError } from 'rxjs/operators';
   `]
 })
 export class InventoryComponent implements OnInit {
+  pageIndex = signal(0);
+  pageSize = signal(10);
+
+  paginatedItems = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.filteredItems().slice(start, start + this.pageSize());
+  });
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
+  }
+
+  constructor() { }
+
   isLoading = signal(true);
   searchTerm = signal('');
   categoryFilter = signal('all');
@@ -403,7 +421,6 @@ export class InventoryComponent implements OnInit {
     snackBarRef.onAction().subscribe(() => {
       this.inventoryService.delete(id).subscribe(() => {
         this.refreshData();
-        this.snackBar.open('Item deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
     });
   }
@@ -474,17 +491,14 @@ export class InventoryComponent implements OnInit {
         next: () => {
           this.refreshData();
           this.snackBar.open(`Imported ${validItems.length} items successfully`, 'Close', { duration: 4000 });
-          this.isImporting.set(false);
-          event.target.value = '';
         },
         error: () => {
           this.snackBar.open('Import failed. Please check your data or try again later.', 'Close', { duration: 5000, panelClass: ['bg-danger', 'text-white'] });
-          this.isImporting.set(false);
-          event.target.value = '';
         }
       });
     } catch (err) {
       this.snackBar.open('Error parsing file.', 'Close', { duration: 4000, panelClass: ['bg-danger', 'text-white'] });
+    } finally {
       this.isImporting.set(false);
       event.target.value = '';
     }

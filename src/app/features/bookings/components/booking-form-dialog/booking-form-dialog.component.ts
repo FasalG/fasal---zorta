@@ -527,15 +527,10 @@ export class BookingFormDialogComponent implements OnInit {
       this.bookingService.update(this.currentBooking as Booking).subscribe({
         next: () => {
           this.isSaving.set(false);
-          this.snackBar.open('Booking updated successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
           this.dialogRef.close(true);
         },
         error: (err) => {
           this.isSaving.set(false);
-          this.snackBar.open(err.error?.message || 'Failed to update booking', 'Close', {
-            duration: 9000,
-            panelClass: ['bg-danger', 'text-white']
-          });
         }
       });
     } else {
@@ -548,15 +543,10 @@ export class BookingFormDialogComponent implements OnInit {
       this.bookingService.add(newBooking).subscribe({
         next: () => {
           this.isSaving.set(false);
-          this.snackBar.open('Booking created successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
           this.dialogRef.close(true);
         },
         error: (err) => {
           this.isSaving.set(false);
-          this.snackBar.open(err.error?.message || 'Failed to create booking', 'Close', {
-            duration: 9000,
-            panelClass: ['bg-danger', 'text-white']
-          });
         }
       });
     }

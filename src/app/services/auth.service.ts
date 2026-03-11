@@ -1,14 +1,22 @@
-import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, signal, inject } from '@angular/core';
 import { Observable, tap, catchError, throwError } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { ApiService } from '../core/services/api.service';
+import { Endpoints } from '../core/constants/endpoints';
+import { HttpMethod } from '../core/enums/httpmethod.enum';
+
+export interface CompanyDetails {
+    name: string;
+    address?: string;
+    phone?: string;
+    gst_number?: string;
+}
 
 export interface User {
     _id: string;
     name: string;
     email: string;
     role: string;
-    companyDetails?: any;
+    companyDetails?: CompanyDetails;
 }
 
 export interface AuthResponse {
@@ -20,16 +28,20 @@ export interface AuthResponse {
     providedIn: 'root'
 })
 export class AuthService {
-    private apiUrl = `${environment.apiUrl}/auth`;
+    private api = inject(ApiService);
 
     // Reactive state using Signals
     currentUser = signal<User | null>(this.getStoredUser());
     isAuthenticated = signal<boolean>(this.hasToken());
 
-    constructor(private http: HttpClient) { }
+    constructor() { }
 
     login(credentials: any): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
+        return this.api.HttpRequestHandler<AuthResponse>({
+            method: HttpMethod.POST,
+            endpoint: Endpoints.AUTH.LOGIN,
+            body: credentials
+        }).pipe(
             tap(response => {
                 this.setSession(response);
             }),
@@ -44,6 +56,7 @@ export class AuthService {
         localStorage.removeItem('zorta_user');
         this.currentUser.set(null);
         this.isAuthenticated.set(false);
+        this.api.clearAllCache();
     }
 
     getToken(): string | null {
@@ -51,6 +64,14 @@ export class AuthService {
     }
 
     private setSession(authResult: AuthResponse) {
+        // Fallback for company name if not provided by backend
+        if (authResult.user && (!authResult.user.companyDetails || !authResult.user.companyDetails.name)) {
+            authResult.user.companyDetails = {
+                ...authResult.user.companyDetails,
+                name: 'soberdosis'
+            };
+        }
+
         localStorage.setItem('zorta_token', authResult.token);
         localStorage.setItem('zorta_user', JSON.stringify(authResult.user));
         this.currentUser.set(authResult.user);
@@ -58,8 +79,15 @@ export class AuthService {
     }
 
     private getStoredUser(): User | null {
-        const user = localStorage.getItem('zorta_user');
-        return user ? JSON.parse(user) : null;
+        try {
+            const user = localStorage.getItem('zorta_user');
+            return user ? JSON.parse(user) : null;
+        } catch (e) {
+            console.error('Error parsing stored user data, clearing storage:', e);
+            localStorage.removeItem('zorta_user');
+            localStorage.removeItem('zorta_token');
+            return null;
+        }
     }
 
     private hasToken(): boolean {

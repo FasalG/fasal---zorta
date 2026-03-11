@@ -1,34 +1,55 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../core/services/api.service';
-import { Maintenance } from '../models/rental.models';
 import { Observable } from 'rxjs';
+import { Endpoints } from '../core/constants/endpoints';
+import { HttpMethod } from '../core/enums/httpmethod.enum';
 
 @Injectable({
     providedIn: 'root'
 })
 export class MaintenanceService {
-    private readonly endpoint = 'maintenance';
+    private api = inject(ApiService);
+    private readonly cacheTag = 'maintenance';
 
-    constructor(private api: ApiService) { }
-
-    getAll(): Observable<Maintenance[]> {
-        return this.api.get<Maintenance[]>(this.endpoint);
+    getAll(): Observable<any[]> {
+        return this.api.HttpRequestHandler<any[]>({
+            method: HttpMethod.GET,
+            endpoint: Endpoints.MAINTENANCES.BASE,
+            cacheTags: [this.cacheTag]
+        });
     }
 
-    getById(id: string): Observable<Maintenance> {
-        return this.api.get<Maintenance>(`${this.endpoint}/${id}`);
+    getById(id: string): Observable<any> {
+        return this.api.HttpRequestHandler<any>({
+            method: HttpMethod.GET,
+            endpoint: `${Endpoints.MAINTENANCES.BASE}/${id}`,
+        });
     }
 
-    add(item: Maintenance): Observable<Maintenance> {
-        return this.api.post<Maintenance>(this.endpoint, item);
+    add(item: any): Observable<any> {
+        return this.api.HttpRequestHandler<any>({
+            method: HttpMethod.POST,
+            endpoint: Endpoints.MAINTENANCES.BASE,
+            body: item,
+            invalidateTags: [this.cacheTag]
+        });
     }
 
-    update(item: Maintenance): Observable<Maintenance> {
-        const id = item._id || item._id;
-        return this.api.put<Maintenance>(`${this.endpoint}/${id}`, item);
+    update(item: any): Observable<any> {
+        const id = item._id || item.id;
+        return this.api.HttpRequestHandler<any>({
+            method: HttpMethod.PUT,
+            endpoint: `${Endpoints.MAINTENANCES.BASE}/${id}`,
+            body: item,
+            invalidateTags: [this.cacheTag]
+        });
     }
 
     delete(id: string): Observable<any> {
-        return this.api.delete(`${this.endpoint}/${id}`);
+        return this.api.HttpRequestHandler<any>({
+            method: HttpMethod.DELETE,
+            endpoint: `${Endpoints.MAINTENANCES.BASE}/${id}`,
+            invalidateTags: [this.cacheTag]
+        });
     }
 }

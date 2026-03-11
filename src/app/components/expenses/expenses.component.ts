@@ -1,4 +1,6 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, ViewChild } from '@angular/core';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -10,7 +12,7 @@ import { ExpenseFormDialogComponent } from '../../features/expenses/components/e
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatSnackBarModule, MatTableModule, MatPaginatorModule],
   template: `
     <div class="container-fluid py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
@@ -97,56 +99,71 @@ import { ExpenseFormDialogComponent } from '../../features/expenses/components/e
           <div class="mt-2 text-secondary small">Loading expenses...</div>
         </div>
 
-        <div class="table-responsive" *ngIf="!isLoading()">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light text-secondary small text-uppercase fw-medium">
-              <tr>
-                <th class="px-4 py-3 border-0">Expense #</th>
-                <th class="px-4 py-3 border-0">Date</th>
-                <th class="px-4 py-3 border-0">Category</th>
-                <th class="px-4 py-3 border-0" style="min-width: 250px;">Description</th>
-                <th class="px-4 py-3 border-0">Vendor</th>
-                <th class="px-4 py-3 border-0 text-end">Amount</th>
-                <th class="px-4 py-3 border-0 text-center">Status</th>
-                <th class="px-4 py-3 border-0 text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="border-top-0">
-              <tr *ngFor="let expense of filteredExpenses()" class="hover-bg-light">
-                <td class="px-4 py-3 small fw-medium text-dark">{{ expense.expense_number }}</td>
-                <td class="px-4 py-3 small text-secondary">{{ expense.expense_date }}</td>
-                <td class="px-4 py-3">
-                  <span [class]="getCategoryClass(expense.category)">
-                    {{ expense.category | titlecase }}
-                  </span>
-                </td>
-                <td class="px-4 py-3">
-                  <p class="small text-dark fw-medium mb-0 text-wrap text-truncate" style="max-width: 300px;">{{ expense.description }}</p>
-                </td>
-                <td class="px-4 py-3 small text-secondary">{{ expense.vendor }}</td>
-                <td class="px-4 py-3 small fw-bold text-danger text-nowrap text-end">{{ expense.amount | currency:'INR':'symbol' }}</td>
-                <td class="px-4 py-3 text-center">
-                  <span [class]="getStatusClass(expense.status)">
-                    {{ expense.status | titlecase }}
-                  </span>
-                </td>
-                <td class="px-4 py-3 text-end text-nowrap">
-                  <div class="d-flex align-items-center justify-content-end gap-1">
-                    <button class="btn btn-sm btn-link p-1 text-primary" (click)="openExpenseDialog(expense)">
-                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                    <button class="btn btn-sm btn-link p-1 text-danger" (click)="deleteExpense((expense._id || expense.id)!)">
-                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
+        <div class="table-responsive" [class.d-none]="isLoading()">
+          <table mat-table [dataSource]="dataSource" class="w-100 table-hover align-middle mb-0">
+            <ng-container matColumnDef="expense_number">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">Expense #</th>
+              <td mat-cell *matCellDef="let expense" class="px-4 py-3 small fw-medium text-dark">{{ expense.expense_number }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="expense_date">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">Date</th>
+              <td mat-cell *matCellDef="let expense" class="px-4 py-3 small text-secondary">{{ expense.expense_date }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">Category</th>
+              <td mat-cell *matCellDef="let expense" class="px-4 py-3">
+                <span [class]="getCategoryClass(expense.category)">{{ expense.category | titlecase }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0" style="min-width: 250px;">Description</th>
+              <td mat-cell *matCellDef="let expense" class="px-4 py-3">
+                <p class="small text-dark fw-medium mb-0 text-wrap text-truncate" style="max-width: 300px;">{{ expense.description }}</p>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="vendor">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0">Vendor</th>
+              <td mat-cell *matCellDef="let expense" class="px-4 py-3 small text-secondary">{{ expense.vendor }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0 text-end">Amount</th>
+              <td mat-cell *matCellDef="let expense" class="px-4 py-3 small fw-bold text-danger text-nowrap text-end">{{ expense.amount | currency:'INR':'symbol' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0 text-center">Status</th>
+              <td mat-cell *matCellDef="let expense" class="px-4 py-3 text-center">
+                <span [class]="getStatusClass(expense.status)">{{ expense.status | titlecase }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="px-4 py-3 border-0 text-end">Actions</th>
+              <td mat-cell *matCellDef="let expense" class="px-4 py-3 text-end text-nowrap">
+                <div class="d-flex align-items-center justify-content-end gap-1">
+                  <button class="btn btn-sm btn-link p-1 text-primary" (click)="openExpenseDialog(expense)">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button class="btn btn-sm btn-link p-1 text-danger" (click)="deleteExpense((expense._id || expense.id)!)">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-light text-secondary small text-uppercase fw-medium"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover-bg-light"></tr>
           </table>
+          <mat-paginator [pageSizeOptions]="[10, 25, 50]" [pageSize]="10" showFirstLastButtons></mat-paginator>
         </div>
     </div>
   `,
@@ -192,7 +209,18 @@ export class ExpensesComponent implements OnInit {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
-  constructor() { }
+  displayedColumns: string[] = ['expense_number', 'expense_date', 'category', 'description', 'vendor', 'amount', 'status', 'actions'];
+  dataSource = new MatTableDataSource<any>([]);
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  constructor() {
+    effect(() => {
+      this.dataSource.data = this.filteredExpenses();
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
+    });
+  }
 
   ngOnInit() {
     this.loadExpenses();
@@ -281,7 +309,6 @@ export class ExpensesComponent implements OnInit {
     snackBarRef.onAction().subscribe(() => {
       this.expenseService.delete(id).subscribe(() => {
         this.loadExpenses();
-        this.snackBar.open('Expense deleted successfully', 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
       });
     });
   }
