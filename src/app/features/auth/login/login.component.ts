@@ -60,8 +60,8 @@ import { AuthService } from '../../../services/auth.service';
                   <h2 class="h3 fw-bold text-white mb-0">SOBERDOSIS</h2>
                   <p class="text-white-50 small">Management Suite</p>
                 </div>
-                <h3 class="h2 fw-bold text-white mb-2">Access Portal</h3>
-                <p class="text-white-50">Authorization required to access the vault.</p>
+                <h3 class="h2 fw-bold text-white mb-2 d-none d-lg-block">Access Portal</h3>
+                <p class="text-white-50 d-none d-lg-block">Authorization required to access the vault.</p>
               </div>
 
               <div *ngIf="error" class="alert alert-nextgen-err mb-4" role="alert">
@@ -118,6 +118,7 @@ import { AuthService } from '../../../services/auth.service';
       justify-content: center;
       padding: 2rem;
       font-family: 'Outfit', 'Inter', sans-serif;
+      overflow: hidden;
     }
 
     .glass-morph-card {
@@ -130,6 +131,13 @@ import { AuthService } from '../../../services/auth.service';
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 2.5rem;
       box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+      animation: card-entry 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
+    }
+
+    @keyframes card-entry {
+      0% { transform: translateY(30px) scale(0.98); opacity: 0; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
     }
 
     .branding-panel {
@@ -145,6 +153,12 @@ import { AuthService } from '../../../services/auth.service';
       background-position: center;
       opacity: 0.8;
       z-index: 1;
+      animation: zoom-slow 20s linear infinite alternate;
+    }
+
+    @keyframes zoom-slow {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
     }
 
     .logo-icon-box {
@@ -157,6 +171,25 @@ import { AuthService } from '../../../services/auth.service';
       justify-content: center;
       color: white;
       box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+      animation: float-logo 4s ease-in-out infinite;
+    }
+
+    @keyframes float-logo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .top-brand, .mid-branding, .bottom-branding {
+      animation: slide-up-fade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
+    }
+    .top-brand { animation-delay: 0.3s; }
+    .mid-branding { animation-delay: 0.5s; }
+    .bottom-branding { animation-delay: 0.7s; }
+
+    @keyframes slide-up-fade {
+      0% { transform: translateY(20px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
     }
 
     .bg-white-5 { background: rgba(255, 255, 255, 0.05); }
@@ -177,7 +210,26 @@ import { AuthService } from '../../../services/auth.service';
     .pulse { animation: pulse-animation 2s infinite; }
     @keyframes pulse-animation { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.4); } 100% { opacity: 1; transform: scale(1); } }
 
-    .bg-form-panel { background: rgba(255, 255, 255, 0.01); }
+    .bg-form-panel { 
+      background: rgba(255, 255, 255, 0.01);
+      animation: panel-slide-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      transform: translateX(30px);
+      opacity: 0;
+    }
+    
+    @keyframes panel-slide-in {
+      0% { transform: translateX(30px); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+
+    .form-wrapper .text-left, .form-wrapper .mb-4, .form-wrapper .mb-5, .btn-nextgen-submit {
+      animation: slide-up-fade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
+    }
+    .form-wrapper .text-left { animation-delay: 0.4s; }
+    .form-wrapper .mb-4 { animation-delay: 0.6s; }
+    .form-wrapper .mb-5 { animation-delay: 0.7s; }
+    .btn-nextgen-submit { animation-delay: 0.8s; }
 
     .form-label-nextgen {
       display: block;
@@ -196,7 +248,7 @@ import { AuthService } from '../../../services/auth.service';
       padding: 16px 20px 16px 52px;
       color: white !important;
       font-size: 1rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .input-nextgen:focus {
@@ -204,6 +256,7 @@ import { AuthService } from '../../../services/auth.service';
       background: rgba(255, 255, 255, 0.06) !important;
       border-color: var(--primary) !important;
       box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+      transform: scale(1.01);
     }
 
     .input-icon-nextgen {
@@ -242,6 +295,14 @@ import { AuthService } from '../../../services/auth.service';
       display: flex;
       align-items: center;
       padding: 12px 20px;
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
     }
 
     .smaller { font-size: 0.75rem; }
